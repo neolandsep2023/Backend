@@ -1,3 +1,5 @@
+const Advertisement = require("../api/models/Advertisement.model");
+
 const getRandomAdvertisement = async (req, res) => {
     try {
       const advertisements = await Advertisement.find(); // no estoy seguro si es find o getAll

@@ -21,7 +21,7 @@ const interestsEnum = require("../../data/interestsEnum");
 
 const redirectRegister = async (req, res, next) => {
   let catchImage = req.file?.path;
-  console.log(catchImage);
+  console.log(req.body);
   try {
     await User.syncIndexes();
     let confirmationCode = randomCode();

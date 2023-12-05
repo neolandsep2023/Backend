@@ -44,7 +44,7 @@ const PostRoutes = require('./src/api/routes/Post.routes');
 app.use("/api/v1/posts/", PostRoutes)
 
 const UserRoutes = require('./src/api/routes/User.routes');
-app.use("/api/vi/users/", UserRoutes)
+app.use("/api/v1/users/", UserRoutes)
 
 
 //?--------------------------------------------------------------------------

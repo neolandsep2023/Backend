@@ -6,3 +6,5 @@ const AdvertisementRoutes = require("express").Router();
 AdvertisementRoutes.post("/", upload.single("image"), create);
 AdvertisementRoutes.patch("/:id", upload.single("image"), update)
 AdvertisementRoutes.delete("/:id", deleteAdvertisement)
+
+module.exports = AdvertisementRoutes

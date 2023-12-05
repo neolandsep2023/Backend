@@ -31,7 +31,14 @@ app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ limit: '5mb', extended: false }));
 
 //?-----------------------Crear las rutas---------------------------------
+const RoomRoutes = require('./src/api/routes/Room.routes');
+app.use("/api/v1/rooms/", RoomRoutes);
 
+const AdvertisementRoutes = require('./src/api/routes/Advertisement.routes');
+app.use("/api/v1/advertisements/", AdvertisementRoutes)
+
+const CommentRoutes = require('./src/api/routes/comment.routes');
+app.use("/api/v1/comments/", CommentRoutes)
 
 //?--------------------------------------------------------------------------
 //?-----------------------Poner servidor a funcionar---------------------------------

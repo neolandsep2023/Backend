@@ -3,8 +3,6 @@ const { upload } = require('../../middleware/files.middleware'); //? lo traemos 
 
 
 const {
-    userRegistration,
-    stateRegister,
     redirectRegister,
     userLogin,
     resendCode,
@@ -27,12 +25,11 @@ const {
     getUserByIdPopulatedLikedAlbums,
   } = require('../controllers/User.controller');
   
+
   //!--------ROUTES----------------------------------------------
   
   const UserRoutes = require('express').Router();
   
-  UserRoutes.post('/register', upload.single('image'), userRegistration);
-  UserRoutes.post('/registerState', upload.single('image'), stateRegister);
   UserRoutes.post(
     '/register/registerRedirect',
     upload.single('image'),
@@ -55,21 +52,7 @@ const {
     upload.single('image'),
     updateUser
   );
-  UserRoutes.get('/userByIdLikes', [isAuthorized], getUserByIdLikedAlbums);
-  UserRoutes.get(
-    '/populatedAlbums',
-    [isAuthorized],
-    getUserByIdPopulatedLikedAlbums
-  );
-  UserRoutes.get('/userById', [isAuthorized], getUserById);
-  UserRoutes.delete('/delete', [isAuthorized], deleteUser);
-  UserRoutes.patch('/follow/:id', [isAuthorized], toggleFollow);
-  UserRoutes.patch('/favSong/:id', [isAuthorized], toggleFavSong);
-  UserRoutes.patch('/favAlbum/:id', [isAuthorized], toggleFavAlbumIndiv);
-  UserRoutes.patch('/setFavAlbum', [isAuthorized], toggleFavAlbum); //este lo pilla por el body
-  UserRoutes.get('/', [isAuthorized], getBySwitch);
-  UserRoutes.get('/sort', [isAuthorized], sortSwitch);
-  
+
   //!-------REDIRECTS--------------------------------------------
   
   UserRoutes.post('/register/sendMail/:id', sendCode);

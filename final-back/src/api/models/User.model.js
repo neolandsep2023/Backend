@@ -3,6 +3,7 @@ const validator = require("validator"); //? validamos información
 const mongoose = require("mongoose"); //? hacemos modelo
 const genderEnum = require("../../data/genderEnum");
 const interestsEnum = require("../../data/interestsEnum");
+const rolesEnum = require("../../data/rolesEnum");
 
 const UserSchema = new mongoose.Schema(
   {
@@ -47,8 +48,8 @@ const UserSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: roleEnum,
-      default: "user",
+      enum: rolesEnum,
+      default: "lessee",
     },
     confirmationCode: {
       type: Number,

@@ -40,6 +40,9 @@ app.use("/api/v1/advertisements/", AdvertisementRoutes)
 const CommentRoutes = require('./src/api/routes/Comments.routes');
 app.use("/api/v1/comments/", CommentRoutes)
 
+const PostRoutes = require('./src/api/routes/Post.routes');
+app.use("/api/v1/posts/", PostRoutes)
+
 //?--------------------------------------------------------------------------
 //?-----------------------Poner servidor a funcionar---------------------------------
 

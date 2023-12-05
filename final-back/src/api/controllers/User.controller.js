@@ -93,7 +93,7 @@ const sendCode = async (req, res, next) => {
       from: emailEnv,
       to: userDB.email,
       subject: "Confirmation code",
-      text: `Your code is ${confirmationCode}. Thank you for using our service.`,
+      text: `Your code is ${userDB.confirmationCode}. Thank you for using our service.`,
     };
 
     transporter.sendMail(mailOptions, function (error, info) {

@@ -9,9 +9,8 @@ const createRoom = async (req, res, next) => {
     await Room.syncIndexes();
     const newRoom = new Room(req.body);
     if (catchImg.length > 0) {
-      console.log(catchImg.length)
+      let a = 0
       catchImg.map((img) => {
-        let a = 0
         newRoom.image.push(catchImg[a].path)
         a++
       })

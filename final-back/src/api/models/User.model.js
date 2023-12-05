@@ -30,10 +30,12 @@ const UserSchema = new mongoose.Schema(
       trim: true,
       unique: true,
     },
-    birthDate: {
+    birthYear: {
       type: Number,
       required: true,
       trim: true,
+      min: 1900,
+      max: 2005,
     },
     password: {
       type: String,

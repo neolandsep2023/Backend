@@ -1,4 +1,5 @@
-const { isAuth,   } = require('../../middleware/auth.middleware');
+
+const { isAuth, isAuthAdmin } = require('../../middleware/auth.middleware');
 const { upload } = require('../../middleware/files.middleware'); //? lo traemos porque hay una subida de ficheros
 
 
@@ -14,15 +15,6 @@ const {
     passwordChange,
     updateUser,
     deleteUser,
-    toggleFollow,
-    toggleFavSong,
-    toggleFavAlbum,
-    getBySwitch,
-    sortSwitch,
-    getUserById,
-    getUserByIdLikedAlbums,
-    toggleFavAlbumIndiv,
-    getUserByIdPopulatedLikedAlbums,
   } = require('../controllers/User.controller');
   
 

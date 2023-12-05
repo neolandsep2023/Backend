@@ -34,7 +34,7 @@ const isAuthAdmin = async (req, res, next) => {
     const decoded = verifyToken(token, process.env.JWT_SECRET);
     req.user = await User.findById(decoded.id);
 
-    if (req.user.rol !== 'admin') {
+    if (req.user.role !== 'admin') {
       return next(new Error('Unauthorized, not admin'));
     }
     next();

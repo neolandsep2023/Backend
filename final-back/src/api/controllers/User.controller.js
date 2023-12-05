@@ -15,6 +15,7 @@ const bcrypt = require("bcrypt");
 
 //<!--IMP                                             MODELS                                                     ->
 const User = require("../models/User.model");
+const interestsEnum = require("../../data/interestsEnum");
 
 //<!--SEC                                   REDIRECT  REGISTRATION                                                   ->
 
@@ -35,6 +36,12 @@ const redirectRegister = async (req, res, next) => {
       } else {
         newUser.image = "https://pic.onlinewebfonts.com/svg/img_181369.png";
       }
+
+      //   if(req.body.interests) {
+      //     req.body.interests.forEach(element => {
+      //         interestsEnum('interests', item)
+      //     });
+      //   }
       try {
         const savedUser = await newUser.save();
         if (savedUser) {
@@ -147,13 +154,16 @@ const newUserisVerified = async (req, res, next) => {
           isVerified: false,
           delete: (await User.findById(doesUserExist._id))
             ? "Error deleting user."
-            : "User deleted for security. Please submit again.",
+            : "User deleted for security. Please register again.",
         });
       }
     }
   } catch (error) {
-    return next(
-      setError(500, error.message || "Error in user isVerified try catch")
+    return (
+      res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      }) && next(error)
     );
   }
 };
@@ -196,7 +206,12 @@ const resendCode = async (req, res, next) => {
       return res.status(404).json("User does not exist.");
     }
   } catch (error) {
-    return next(error.message);
+    return (
+      res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      }) && next(error)
+    );
   }
 };
 
@@ -221,7 +236,12 @@ const userLogin = async (req, res, next) => {
       return res.status(404).json("User not found.");
     }
   } catch (error) {
-    return next(error);
+    return (
+      res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      }) && next(error)
+    );
   }
 };
 
@@ -245,7 +265,12 @@ const autoLogin = async (req, res, next) => {
       return res.status(404).json("User does not exist.");
     }
   } catch (error) {
-    return next(error);
+    return (
+      res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      }) && next(error)
+    );
   }
 };
 
@@ -260,7 +285,7 @@ const passChangeWhileLoggedOut = async (req, res, next) => {
       console.log("userFromDB antes del redirect:", userFromDB._id);
       return res.redirect(
         307,
-        `http://localhost:8088/api/v1/users/sendPassword/${userFromDB._id}`
+        `http://localhost:8081/api/v1/users/sendPassword/${userFromDB._id}`
       );
     } else {
       return res.status(404).json("User does not exist.");
@@ -298,7 +323,7 @@ const sendPassword = async (req, res, next) => {
       from: envEmail,
       to: userById.email,
       subject: `Hi, ${userById.name}`,
-      text: `Hi, here is your temporary password. Please change it after entering. ${newPassword}`,
+      text: `Hi, here is your temporary password. Please change it immediately after login. ${newPassword}`,
     };
 
     transporter.sendMail(mailOptions, async function (error, info) {
@@ -323,7 +348,7 @@ const sendPassword = async (req, res, next) => {
           } else {
             return res.status(404).json({
               message:
-                "Mail sent but password not changed. Please send the code again.",
+                "Mail sent but password not changed. Please send the password again.",
             });
           }
         } catch (error) {
@@ -332,7 +357,12 @@ const sendPassword = async (req, res, next) => {
       }
     });
   } catch (error) {
-    return next(setError(500, "Catch sendPasswordRedirect"));
+    return (
+      res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      }) && next(error)
+    );
   }
 };
 
@@ -380,13 +410,154 @@ const passwordChange = async (req, res, next) => {
         );
     }
   } catch (error) {
-    return next(
-      setError(500, error.message || "Error in change password catch.")
+    return (
+      res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      }) && next(error)
     );
   }
 };
 
 //<!--SEC                                          UPDATE USER                                                   ->
+
+const updateUser = async (req, res, next) => {
+  let catchImage = req.file?.path;
+  try {
+    await User.syncIndexes();
+    const patchedUser = new User(req.body);
+    req.file && (patchedUser.image = catchImage);
+
+    patchedUser._id = req.user._id;
+    patchedUser.password = req.user.password;
+    patchedUser.role = req.user.role;
+    patchedUser.confirmationEmailCode = req.user.confirmationEmailCode;
+    patchedUser.userEmail = req.user.userEmail;
+    patchedUser.isVerified = req.user.isVerified;
+    patchedUser.favAlbums = req.user.favAlbums;
+    patchedUser.favSongs = req.user.favSongs;
+    patchedUser.followers = req.user.followers;
+    patchedUser.following = req.user.following;
+    patchedUser.gender = req.user.gender;
+
+    // if (req.body?.gender) {
+    //   const enumResult = enumOk(req.body?.gender);
+    //   patchedUser.gender = enumResult.check
+    //     ? req.body?.gender
+    //     : req.user.gender;
+    // }
+
+    try {
+      await User.findByIdAndUpdate(req.user._id, patchedUser);
+      req.file && deleteImgCloudinary(req.user.userEmail);
+
+      //------testing---------
+      const updatedUser = await User.findById(req.user._id);
+      const updatedKeys = Object.keys(req.body);
+      const testingUpdate = [];
+
+      updatedKeys.forEach((item) => {
+        if (updatedUser[item] === req.body[item]) {
+          if (updatedUser[item] != req.user[item]) {
+            testingUpdate.push({ [item]: true });
+          } else {
+            testingUpdate.push({ [item]: "Information is the same." });
+          }
+        } else {
+          testingUpdate.push({ [item]: false });
+        }
+
+        if (req.file) {
+          updatedUser.image === catchImage
+            ? testingUpdate.push({ image: true })
+            : testingUpdate.push({ image: false });
+        }
+        return res.status(200).json({ updatedUser, testingUpdate });
+      });
+    } catch (error) {
+      return res
+        .status(404)
+        .json({ error: "Error in updating the user", message: error.message });
+    }
+  } catch (error) {
+    req.file && deleteImgCloudinary(catchImage);
+    return next(
+      setError(500, error.message || "Error in update general catch.")
+    );
+  }
+};
+
+//<!--SEC                                        DELETE USER                                                     ->
+
+const deleteUser = async (req, res) => {
+  try {
+    console.log(req?.user?.password, "passsssss");
+    const _id = req?.user?._id;
+    // I could also grab the pass and email through the req.user but I thought it safer this way.
+    const dataBaseUser = await User.findById(_id);
+    if (bcrypt.compareSync(req.body.password, req.user.password)) {
+      try {
+        await User.findByIdAndDelete(req.user?._id);
+        deleteImgCloudinary(dataBaseUser.image);
+        try {
+          try {
+            await Song.updateMany(
+              { likedBy: _id },
+              { $pull: { likedBy: _id } }
+            );
+            try {
+              await Album.updateMany(
+                { likedBy: _id },
+                { $pull: { likedBy: _id } }
+              );
+              try {
+                await User.updateMany(
+                  { following: _id },
+                  { $pull: { following: _id } }
+                );
+                try {
+                  await User.updateMany(
+                    { followers: _id },
+                    { $pull: { followers: _id } }
+                  );
+                } catch (error) {
+                  return res.status(404).json("Error pulling followers.");
+                }
+              } catch (error) {
+                return res.status(404).json("Error pulling following.");
+              }
+            } catch (error) {
+              return res.status(404).json("Error pulling albums.");
+            }
+          } catch (error) {
+            return res.status(404).json("Error pulling songs");
+          }
+        } catch (error) {
+          return res
+            .status(404)
+            .json("Error updating references to other models.");
+        }
+        const doesUserExist = await User.findById(req.user._id);
+        console.log(doesUserExist);
+        return res
+          .status(doesUserExist ? 404 : 200)
+          .json(
+            doesUserExist
+              ? "User not deleted. Please try again."
+              : "User deleted successfully."
+          );
+      } catch (error) {
+        return res.status(500).json("Error in delete catch");
+      }
+    } else {
+      return res
+        .status(404)
+        .json("Error in input fields, please check spelling and try again.");
+    }
+  } catch (error) {
+    return res.status(404).json(error.message);
+  }
+};
 
 module.exports = {
   redirectRegister,
@@ -395,8 +566,9 @@ module.exports = {
   newUserisVerified,
   autoLogin,
   userLogin,
-
   passwordChange,
   sendPassword,
   passChangeWhileLoggedOut,
+  updateUser,
+  deleteUser,
 };

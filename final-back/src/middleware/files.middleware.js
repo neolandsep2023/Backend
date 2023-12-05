@@ -8,7 +8,7 @@ dotenv.config();
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'modelo usuarios',
+    folder: 'carpeta proyecto final',
     allowedFormats: ['jpg', 'png', 'jpeg', 'gif', 'svg', 'webp'],
   },
 });

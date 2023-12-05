@@ -5,9 +5,9 @@ const { create, getById, getAllSent, getAllReceived, deleteComment } = require("
 const CommentRoutes = require("express").Router();
 
 CommentRoutes.post("/create/:commented", [isAuth], create);
-CommentRoutes.get("/getbyid/:id", getById);
-CommentRoutes.get("/getallsent/:creator", getAllSent);
-CommentRoutes.get("/getallreceived/:commented", getAllReceived);
+CommentRoutes.get("/getById/:id", getById);
+CommentRoutes.get("/getAllSent/:creator", getAllSent);
+CommentRoutes.get("/getAllReceived/:commented", getAllReceived);
 CommentRoutes.delete("/delete/:id", deleteComment);
 
 module.exports = CommentRoutes

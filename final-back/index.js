@@ -53,4 +53,3 @@ app.use("/api/vi/users/", UserRoutes)
 app.listen(PORT, () => {
   console.log(`Servidor lanzado en el puerto 👌 http://localhost:${PORT}`);
 });
-

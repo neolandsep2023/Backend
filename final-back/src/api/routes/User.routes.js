@@ -14,7 +14,6 @@ const {
     sendPassword,
     passwordChange,
     updateUser,
-    deleteUser,
   } = require('../controllers/User.controller');
   
 
@@ -37,10 +36,10 @@ const {
   );
   
   //!---------AUTH-----------------
-  UserRoutes.patch('/changePassword', [isAuthorized], passwordChange);
+  UserRoutes.patch('/changePassword', [isAuth], passwordChange);
   UserRoutes.patch(
     '/update/update',
-    [isAuthorized],
+    [isAuth],
     upload.single('image'),
     updateUser
   );
@@ -52,3 +51,5 @@ const {
 
 
 module.exports = UserRoutes;
+
+//hola

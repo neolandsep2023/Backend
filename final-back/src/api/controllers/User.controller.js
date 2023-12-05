@@ -123,7 +123,8 @@ const sendCode = async (req, res, next) => {
 
 //<!--SEC                                         isVerified EMAIL                                                   ->
 
-const newUserisVerified = async (req, res, next) => {
+
+const newUserCheck = async (req, res, next) => {
   try {
     const { email, confirmationCode } = req.body;
     const doesUserExist = await User.findOne({ email });
@@ -563,7 +564,7 @@ module.exports = {
   redirectRegister,
   sendCode,
   resendCode,
-  newUserisVerified,
+  newUserCheck,
   autoLogin,
   userLogin,
   passwordChange,

@@ -15,11 +15,11 @@ const {
 const PostRoutes = require("express").Router();
 
 PostRoutes.post("/create/:location", [isAuth], createPost);
-PostRoutes.get("/getbyid/:id", getPostById);
-PostRoutes.get("/getbyidPopulate/:id", getPostByIdPopulate);
-PostRoutes.get("/getall/", getAllPosts);
-PostRoutes.get("/getall/", getAllPostsPopulated);
-PostRoutes.get("/getbytype/:type", postByType);
+PostRoutes.get("/getById/:id", getPostById);
+PostRoutes.get("/getById/populated/:id", getPostByIdPopulate);
+PostRoutes.get("/getAll/", getAllPosts);
+PostRoutes.get("/getAll/populated/", getAllPostsPopulated);
+PostRoutes.get("/getByType/:type", postByType);
 PostRoutes.patch('/update/:id', updatePost);
 PostRoutes.delete("/:id", deletePost);
 

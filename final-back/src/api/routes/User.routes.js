@@ -1,7 +1,6 @@
 
 const { isAuth, isAuthAdmin } = require('../../middleware/auth.middleware');
-const { upload } = require('../../middleware/files.middleware'); //? lo traemos porque hay una subida de ficheros
-
+const { upload } = require('../../middleware/files.middleware');
 
 const {
     redirectRegister,
@@ -13,7 +12,6 @@ const {
     sendCode,
     sendPassword,
     passwordChange,
-    updateUser,
   } = require('../controllers/User.controller');
   
 
@@ -37,12 +35,12 @@ const {
   
   //!---------AUTH-----------------
   UserRoutes.patch('/changePassword', [isAuth], passwordChange);
-  UserRoutes.patch(
-    '/update/update',
-    [isAuth],
-    upload.single('image'),
-    updateUser
-  );
+  // UserRoutes.patch(
+  //   '/update/update',
+  //   [isAuth],
+  //   upload.single('image'),
+  //   updateUser
+  // );
 
   //!-------REDIRECTS--------------------------------------------
   

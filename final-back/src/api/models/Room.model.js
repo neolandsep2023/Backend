@@ -61,7 +61,7 @@ const RoomSchema = new Schema(
     price: {type: Number, required: true},
     postedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],
-    image: {type: String}
+    image: [{type: String}]
   },
   {
     timestamps: true,

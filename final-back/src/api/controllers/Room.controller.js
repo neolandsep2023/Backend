@@ -3,13 +3,18 @@ const Room = require("../models/Room.model");
 
 //! ------------------ CREATE ------------------
 const createRoom = async (req, res, next) => {
-  let catchImg = req.file?.path;
-  console.log("soy req.file", req.file)
+  let catchImg = req.files
+  console.log("soy req.files", req.files)
   try {
     await Room.syncIndexes();
     const newRoom = new Room(req.body);
-    if (req.file) {
-      newRoom.image = catchImg
+    if (catchImg.length > 0) {
+      console.log(catchImg.length)
+      catchImg.map((img) => {
+        let a = 0
+        newRoom.image.push(catchImg[a].path)
+        a++
+      })
     } else {
       newRoom.image = "https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-15.png"
     }

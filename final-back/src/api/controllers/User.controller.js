@@ -47,7 +47,7 @@ const redirectRegister = async (req, res, next) => {
         if (savedUser) {
           return res.redirect(
             307,
-            `http://localhost:8088/api/v1/users/register/sendMail/${savedUser._id}`
+            `http://localhost:8081/api/v1/users/register/sendMail/${savedUser._id}`
           );
         }
       } catch (error) {

@@ -42,7 +42,8 @@ const create = async (req, res, next) => {
   
         const customBody = {
           _id: advertisementById._id, 
-          image: req.file?.path ? catchImg : oldImg, 
+          image: req.file?.path ? catchImg : oldImg,
+          name: req.body?.name ? req.body.name : advertisementById.name, 
         };
   
         try {

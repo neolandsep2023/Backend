@@ -1,7 +1,7 @@
 const genderEnum = require("../data/genderEnum");
 const interestsEnum = require("../data/interestsEnum");
 const commoditiesRoomEnum = require("../data/commoditiesRoomEnum")
-const commoditiesHouseEnum = require("../data/commoditiesHouseEnum")
+const commoditiesHomeEnum = require("../data/commoditiesHomeEnum")
 const housingTypeEnum = require("../data/housingTypeEnum")
 
 const enumCheck = (type, value) => {
@@ -30,7 +30,7 @@ const enumCheck = (type, value) => {
       return commoditiesRoomEnum.includes(value) ? true : false;
 
     case "interests":
-      return commoditiesHouseEnum.includes(value) ? true : false;
+      return commoditiesHomeEnum.includes(value) ? true : false;
 
     default:
       break;

@@ -39,7 +39,7 @@ const updateRoom = async (req, res, next) => {
       const oldImg = roomById.image;
 
       const customBody = {
-        _id: playerById._id,
+        _id: roomById._id,
         image: req.file?.path ? catchImg : oldImg,
         title: req.file?.title ? req.file.title : roomById.title,
         description: req.file?.description ? req.file.description : roomById.description,

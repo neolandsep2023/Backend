@@ -9,4 +9,4 @@ const housingTypeEnum = [
   "Flat",
 ]
 
-module.exports = houstingTypeEnum
+module.exports = housingTypeEnum

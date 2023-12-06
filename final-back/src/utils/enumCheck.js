@@ -1,5 +1,8 @@
 const genderEnum = require("../data/genderEnum");
 const interestsEnum = require("../data/interestsEnum");
+const commoditiesRoomEnum = require("../data/commoditiesRoomEnum")
+const commoditiesHouseEnum = require("../data/commoditiesHouseEnum")
+const housingTypeEnum = require("../data/housingTypeEnum")
 
 const enumCheck = (type, value) => {
   //type es por donde va a entrar, y value el valor que queramos comprobar si esta en el array

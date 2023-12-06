@@ -56,7 +56,7 @@ const updateRoom = async (req, res, next) => {
 
       try {
         await Room.findByIdAndUpdate(id, customBody)
-        if (req.file?.path) {
+        if (catchImg) {
           deleteImgCloudinary(oldImg); 
         }
         //!           -------------------

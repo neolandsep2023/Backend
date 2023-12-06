@@ -1,6 +1,8 @@
 const { upload } = require("../../middleware/files.middleware");
 const { 
   createRoom,
+  updateRoom,
+  deleteRoom,
   getById,
   getByName,
   getAll,
@@ -12,6 +14,8 @@ const {
 const RoomRoutes = require("express").Router();
 
 RoomRoutes.post("/", upload.array("image", 10), createRoom)
+RoomRoutes.patch("/:id", upload.single("image"), updateRoom);
+RoomRoutes.delete("/:id", deleteRoom);
 RoomRoutes.get("/:id", getById)
 RoomRoutes.get("/", getAll)
 RoomRoutes.get("/byName/:name", getByName)

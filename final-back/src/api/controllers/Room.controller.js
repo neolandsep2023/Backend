@@ -30,12 +30,144 @@ const createRoom = async (req, res, next) => {
 
 //! ------------------ UPDATE ------------------
 const updateRoom = async (req, res, next) => {
-  await Room.syncIndexes();
+  await Room.syncIn2dexes();
   let catchImg = req.files
+  try {
+    const { id } = req.params;
+    const roomById = await Room.findById(id);
+    if (roomById) {
+      const oldImg = roomById.image;
+
+      const customBody = {
+        _id: playerById._id,
+        image: req.file?.path ? catchImg : oldImg,
+        title: req.file?.title ? req.file.title : roomById.title,
+        description: req.file?.description ? req.file.description : roomById.description,
+        surface: req.file?.surface ? req.file.surface : roomById.surface,
+        bathroom: req.file?.bathroom ? req.file.bathroom : roomById.bathroom,
+        publicLocation: req.file?.publicLocation ? req.file.publicLocation : roomById.publicLocation,
+        petsAllowed: req.file?.petsAllowed ? req.file.petsAllowed : roomById.petsAllowed,
+        exterior: req.file?.exterior ? req.file.exterior : roomById.exterior,
+        deposit: req.file?.deposit ? req.file.deposit : roomById.deposit,
+        depositPrice: req.file?.depositPrice ? req.file.depositPrice : roomById.depositPrice,
+        roomates: req.file?.roomates ? req.file.roomates : roomById.roomates,
+        price: req.file?.price ? req.file.price : roomById.price,
+      }
+
+      try {
+        await Room.findByIdAndUpdate(id, customBody)
+        if (req.file?.path) {
+          deleteImgCloudinary(oldImg); 
+        }
+        //!           -------------------
+        //!           | RUNTIME TESTING |
+        //!           -------------------
+
+        const roomByIdUpdated = await Room.findById(id); //? ---- buscamos el elemento actualizado a través del id
+        const elementUpdate = Object.keys(req.body); //? ----------- buscamos los elementos de la request para saber qué se tiene que actualizar
+        let test = []; //? ----------------------------------------- objeto vacío donde meter los tests. estará compuesta de las claves de los elementos y los valores seran true/false segun haya ido bien o mal
+
+        elementUpdate.forEach((key) => {
+          //? ----------------------------- recorremos las claves de lo que se quiere actualizar
+          if (req.body[key] === roomByIdUpdated[key]) {
+            //? ---------- si el valor de la clave en la request (el valor actualizado que hemos pedido meter) es el mismo que el que hay ahora en el elemento ---> está bien
+            test.push({ [key]: true }); //? ------------------------------------ está bien hecho por lo tanto en el test con la clave comprobada ponemos true --> test aprobado hehe
+          } else {
+            test.push({ [key]: false }); //? ----------------------------------- algo ha fallado y por lo tanto el test está suspendido (false)
+          }
+        });
+
+        if (catchImg) {
+          roomByIdUpdated.image = catchImg //? ---------------- si la imagen en la request es la misma que la que hay ahora en el elemento
+            ? (test = { ...test, file: true }) //? ------------- hacemos una copia de test y le decimos que en file (foto) es true, ha ido bien
+            : (test = { ...test, file: false }); //? ------------ hacemos una copia de test y le decimos que en file (foto) es false, ha ido mal
+        }
+
+        let acc = 0;
+        for (let clave in test) {
+          //? -------------------- recorremos tests
+          test[clave] == false ? acc++ : null; //? - si el valor es false es que algo ha fallado y le sumamos al contador de fallos
+        }
+
+        if (acc > 0) {
+          //? --------------------- si acc 1 o más, es que ha habido uno o más errores, y por lo tanto hay que notificarlo
+          return res.status(404).json({
+            dataTest: test, //? ------------ por aquí podremos examinar los errores viendo en qué claves se han producido
+            update: false,
+          });
+        } else {
+          return res.status(200).json({
+            dataTest: test,
+            update: true,
+            updatedRoom: roomByIdUpdated,
+          });
+        }
+      } catch (error) {
+        return res.status(404).json({
+          message: "there was an error saving the room",
+          error: error.message,
+        });
+      }
+
+    } else {
+      return res.status(404).json("no matching room")
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error en el catch",
+      message: error.message,
+    })
+  }
 }
 
 //! ------------------ DELETE ------------------
+const deleteRoom = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const room = await Room.findByIdAndDelete(id);
 
+    if (room) {
+      try {
+        //? --------------------------------------- ELIMINAMOS AL ROOM DEL USER (postedBy)
+        await User.updateMany(
+
+          { myPosts: id },
+          { $pull: { myPosts: id } }, 
+        );
+
+        try {
+          //? -------------------------------------- ELIMINAMOS AL ROOM DEL USER (liked)
+          await User.updateMany(
+            { savedRooms: id },
+            { $pull: { savedRooms: id } }, 
+          );
+        } catch (error) {
+          return res.status(500).json({
+            error: "Error en el catch",
+            message: error.message,
+          })
+        }
+      } catch (error) {
+        return res.status(500).json({
+          error: "Error en el catch",
+          message: error.message,
+        })
+      }
+
+      const findByIdRoom = await Room.findById(id);
+      return res.status(findByIdRoom ? 404 : 200).json({
+        deleteTest: findByIdRoom ? false : true, 
+      });
+    } else {
+      return res.status(404).json("the given player does not exist"); 
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error en el catch",
+      message: error.message,
+    })
+  }
+};
 
 //! ------------------ GET by ID ------------------
 const getById = async (req, res, next) => {
@@ -154,9 +286,12 @@ const filterRooms = async (req, res, next) => {
 
 module.exports = {
   createRoom,
+  updateRoom,
+  deleteRoom,
   getById,
   getByName,
   getAll,
   sortRooms,
-  filterRooms
+  filterRooms,
+
 }

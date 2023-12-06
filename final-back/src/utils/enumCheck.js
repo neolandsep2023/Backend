@@ -9,6 +9,15 @@ const enumCheck = (type, value) => {
 
         case 'interests':
             return interestsEnum.includes(value) ? true : false;
+
+        case 'interests':
+            return housingTypeEnum.includes(value) ? true : false;
+
+        case 'interests':
+            return commoditiesRoomEnum.includes(value) ? true : false;
+
+        case 'interests':
+            return commoditiesHouseEnum.includes(value) ? true : false;
             
         default:
             break;

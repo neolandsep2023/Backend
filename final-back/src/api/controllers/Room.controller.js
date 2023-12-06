@@ -143,13 +143,13 @@ const deleteRoom = async (req, res, next) => {
           );
         } catch (error) {
           return res.status(500).json({
-            error: "Error en el catch",
+            error: "Error when deleting liked room from users",
             message: error.message,
           })
         }
       } catch (error) {
         return res.status(500).json({
-          error: "Error en el catch",
+          error: "Error when deleting posted room from user",
           message: error.message,
         })
       }
@@ -159,7 +159,7 @@ const deleteRoom = async (req, res, next) => {
         deleteTest: findByIdRoom ? false : true, 
       });
     } else {
-      return res.status(404).json("the given player does not exist"); 
+      return res.status(404).json("the given room does not exist"); 
     }
   } catch (error) {
     return res.status(500).json({

@@ -17,6 +17,9 @@ const {
   getUserById,
   getByName,
   getByAge,
+  toggleLikedPost,
+  saveRoom,
+  toggleLikedComment,
 } = require("../controllers/User.controller");
 
 //!--------ROUTES----------------------------------------------
@@ -50,6 +53,9 @@ UserRoutes.get("/getAll", [isAuth], getAll)
 UserRoutes.get("/getById/:id", [isAuth], getUserById)
 UserRoutes.get("/byName/name", [isAuth], getByName)
 UserRoutes.get("/byAge/age", [isAuth], getByAge)
+UserRoutes.patch("/likeRoom/:id", [isAuth], toggleLikedComment)
+UserRoutes.patch("/likePost/:id", [isAuth], toggleLikedPost)
+UserRoutes.patch("/saveRoom/:id", [isAuth], saveRoom)
 
 
 

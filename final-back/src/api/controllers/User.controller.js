@@ -21,6 +21,7 @@ const Room = require("../models/Room.model");
 const Comment = require("../models/Comment.model");
 
 //<!--SEC                                   REDIRECT  REGISTRATION                                                   ->
+//WORKS CORRECTLY
 
 const redirectRegister = async (req, res, next) => {
   let catchImage = req.file?.path;
@@ -125,6 +126,8 @@ const sendCode = async (req, res, next) => {
 };
 
 //<!--SEC                                         isVerified EMAIL                                                   ->
+//WORKS CORRECTLY
+
 
 const newUserCheck = async (req, res, next) => {
   try {
@@ -172,6 +175,8 @@ const newUserCheck = async (req, res, next) => {
 };
 
 //<!--SEC                                         RESEND EMAIL                                                   ->
+//WORKS CORRECTLY
+
 
 const resendCode = async (req, res, next) => {
   //ESTA ES LA UNICA QUE ES ASINCRONA DE MANDAR UN CODIGO
@@ -219,6 +224,8 @@ const resendCode = async (req, res, next) => {
 };
 
 //<!--SEC                                             LOGIN                                                     ->
+//WORKS CORRECTLY
+
 const userLogin = async (req, res, next) => {
   try {
     const { password, email } = req.body;
@@ -278,6 +285,8 @@ const autoLogin = async (req, res, next) => {
 };
 
 //<!--SEC                                  PASSWORD CHANGE WHILE LOGGED OUT                                   ->
+//WORKS CORRECTLY
+
 
 const passChangeWhileLoggedOut = async (req, res, next) => {
   try {
@@ -374,6 +383,8 @@ const sendPassword = async (req, res, next) => {
 //<!--SEC                                             WITH AUTH                                                     ->
 
 //<!--SEC                                           PASSWORD CHANGE                                              ->
+//WORKS CORRECTLY
+
 
 const passwordChange = async (req, res, next) => {
   try {
@@ -595,6 +606,8 @@ const deleteUser = async (req, res, next) => {
 };
 
 //<!--SEC                                        GET ALL                                                     ->
+//WORKS CORRECTLY
+
 const getAll = async (req, res, next) => {
   try {
     const allUsers = await User.find();
@@ -613,9 +626,10 @@ const getAll = async (req, res, next) => {
 
 
 //<!--SEC                                        GET BY ID                                                     ->
+//WORKS CORRECTLY
 const getUserById = async (req, res, next) => {
   try {
-    const { id } = req.body;
+    const { id } = req.params;
     const userById = await User.findById(id);
     if (userById) {
       return res.status(200).json(userById);
@@ -634,6 +648,7 @@ const getUserById = async (req, res, next) => {
 
 
 //<!--SEC                                        GET BY NAME                                                     ->
+//WORKS CORRECTLY
 
 const getByName = async (req, res, next) => {
   //es para name y para userName!!
@@ -666,7 +681,7 @@ const getByAge = async(req, res, next) => {
   try {
     let { age } = req.body;
     const currentYear = new Date().getFullYear();
-    const targetYear = currentYear - age.parseInt();
+    const targetYear = currentYear - parseInt(age);
     let range;
     let filter
     if (req.body?.range) {
@@ -679,7 +694,7 @@ const getByAge = async(req, res, next) => {
     if (req.body?.filter) {
       filter = req.body.filter === 'des' ? -1 : 1; //I could set a switch but in pos of a selector that only lets you have two values, i wont
     }
-    let baseYear = targetYear.parseInt();
+    let baseYear = parseInt(targetYear);
     let younger = baseYear + range;
     let older = baseYear - range;
     console.log(older, baseYear, younger);
@@ -701,13 +716,182 @@ const getByAge = async(req, res, next) => {
       return res.status(404).json('Error finding users catch.');
     }
   } catch (error) {
-    return res.status(404).json('Error in length Switch clause.');
+    return res.status(500).json({
+      error: "Error en el catch",
+      message: error.message,
+    }) && next(error)
   }
 }
 
 
-//<!--SEC                                        DELETE USER                                                     ->
-//<!--SEC                                        DELETE USER                                                     ->
+//<!--SEC                                        TOGGLE LIKE                                                     ->
+const toggleLikedPost = async (req, res, next) => {
+  try {
+    console.log('body y user', req.body, req.user);
+    const { id } = req.params;
+    const { _id, likedPosts } = req.user;
+    if (likedPosts.includes(id)) {
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $pull: { likedPosts: id },
+        });
+        try {
+          await Post.findByIdAndUpdate(id, {
+            $pull: { likes: _id },
+          });
+          return res.status(200).json({
+            user: await User.findById(_id),
+            postUnfavorited: await Post.findById(id),
+          });
+        } catch (error) {
+          return res.status(404).json('Error in pulling user from likes.');
+        }
+      } catch (error) {
+        return res.status(404).json('Error in pulling post from LikedPosts.');
+      }
+    } else {
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $push: { likedPosts: id },
+        });
+        try {
+          await Post.findByIdAndUpdate(id, {
+            $push: { likes: _id },
+          });
+          return res.status(200).json({
+            user: await User.findById(_id),
+            addedLikedPosts: await Post.findById(id),
+          });
+        } catch (error) {
+          return res.status(404).json({
+            error: error.message,
+            message: 'Error in pushing our id to likes in post.',
+          });
+        }
+      } catch (error) {
+        return res.status(404).json('Error in pushing post to likedPosts.');
+      }
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error en el catch",
+      message: error.message,
+    }) && next(error)
+  }
+};
+
+//<!--SEC                                        TOGGLE LIKED COMMENTS                                                     ->
+const toggleLikedComment = async (req, res, next) => {
+  try {
+    console.log('body y user', req.body, req.user);
+    const { id } = req.params;
+    const { _id, likedComments } = req.user;
+    if (likedComments.includes(id)) {
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $pull: { likedComments: id },
+        });
+        try {
+          await Comment.findByIdAndUpdate(id, {
+            $pull: { likes: _id },
+          });
+          return res.status(200).json({
+            user: await User.findById(_id),
+            commentUnfavorited: await Comment.findById(id),
+          });
+        } catch (error) {
+          return res.status(404).json('Error in pulling user from likes.');
+        }
+      } catch (error) {
+        return res.status(404).json('Error in pulling comment from likedComments.');
+      }
+    } else {
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $push: { likedComments: id },
+        });
+        try {
+          await Comment.findByIdAndUpdate(id, {
+            $push: { likes: _id },
+          });
+          return res.status(200).json({
+            user: await User.findById(_id),
+            addedLikedComment: await Comment.findById(id),
+          });
+        } catch (error) {
+          return res.status(404).json({
+            error: error.message,
+            message: 'Error in pushing our id to likes in comment.',
+          });
+        }
+      } catch (error) {
+        return res.status(404).json('Error in pushing post to likedComments.');
+      }
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error en el catch",
+      message: error.message,
+    }) && next(error)
+  }
+};
+
+
+//<!--SEC                                        TOGGLE SAVED ROOM                                                     ->
+const saveRoom = async (req, res, next) => {
+  try {
+    console.log('body y user', req.body, req.user);
+    const { id } = req.params;
+    const { _id, savedRooms } = req.user;
+    if (savedRooms.includes(id)) {
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $pull: { savedRooms: id },
+        });
+        try {
+          await Room.findByIdAndUpdate(id, {
+            $pull: { likes: _id },
+          });
+          return res.status(200).json({
+            user: await User.findById(_id),
+            roomUnfavorited: await Room.findById(id),
+          });
+        } catch (error) {
+          return res.status(404).json('Error in pulling user from likes.');
+        }
+      } catch (error) {
+        return res.status(404).json('Error in pulling room from likedRooms.');
+      }
+    } else {
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $push: { savedRooms: id },
+        });
+        try {
+          await Post.findByIdAndUpdate(id, {
+            $push: { likes: _id },
+          });
+          return res.status(200).json({
+            user: await User.findById(_id),
+            addedRoom: await Room.findById(id),
+          });
+        } catch (error) {
+          return res.status(404).json({
+            error: error.message,
+            message: 'Error in pushing our id to likes in room.',
+          });
+        }
+      } catch (error) {
+        return res.status(404).json('Error in pushing room to savedRooms.');
+      }
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error en el catch",
+      message: error.message,
+    }) && next(error)
+  }
+};
 //<!--SEC                                        DELETE USER                                                     ->
 
 
@@ -734,4 +918,7 @@ module.exports = {
   getUserById,
   getByName,
   getByAge,
+  toggleLikedComment,
+  toggleLikedPost,
+  saveRoom,
 };

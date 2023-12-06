@@ -6,6 +6,7 @@ const CommentSchema = new Schema(
     creator: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
  name: { type: String },
  commented: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+ commentPost: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },
    nameComentador: { type: String },
     image: { type: String },
    textComment: { type: String, unique: false, required: true },

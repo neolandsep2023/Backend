@@ -32,6 +32,7 @@ const createRoom = async (req, res, next) => {
 const updateRoom = async (req, res, next) => {
   await Room.syncIndexes();
   let catchImg = req.files
+  console.log(catchImg)
   try {
     const { id } = req.params;
     const roomById = await Room.findById(id);

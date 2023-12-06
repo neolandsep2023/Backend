@@ -14,7 +14,7 @@ const {
 const RoomRoutes = require("express").Router();
 
 RoomRoutes.post("/", upload.array("image", 10), createRoom)
-RoomRoutes.patch("/:id", upload.single("image"), updateRoom);
+RoomRoutes.patch("/:id", upload.array("image", 10), updateRoom);
 RoomRoutes.delete("/:id", deleteRoom);
 RoomRoutes.get("/:id", getById)
 RoomRoutes.get("/", getAll)

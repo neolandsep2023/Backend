@@ -23,13 +23,13 @@ const enumCheck = (type, value) => {
         return acc == value.length ? { check: true } : { check: false };
       }
 
-    case "interests":
+    case "housingType":
       return housingTypeEnum.includes(value) ? true : false;
 
-    case "interests":
+    case "commoditiesRoom":
       return commoditiesRoomEnum.includes(value) ? true : false;
 
-    case "interests":
+    case "commoditiesHome":
       return commoditiesHomeEnum.includes(value) ? true : false;
 
     default:

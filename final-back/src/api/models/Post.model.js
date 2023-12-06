@@ -1,10 +1,18 @@
+const citiesEnum = require('../../data/citiesEnum')
+
+
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema;
+
+
+
+
 const PostSchema = new Schema(
     {
       title: { type: String, required: true, minLength: 10, maxLength: 50},
       text: { type: String, required: true, minLength: 50, maxLength: 600 },
       image: { type: String },
+      location: { type: String, enum: citiesEnum, required: true },
       type: { type: String, enum: ['RoomSeeker', 'RoommateSeeker'], required: true },
       author: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
       // authorImage: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],

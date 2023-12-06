@@ -21,6 +21,7 @@ const createPost = async (req, res) => {
     newPost.title = body.title
     newPost.text = body.text
     newPost.type = body.type
+    newPost.location = body.location
     console.log(newPost)
 
     const savedPost = await newPost.save();
@@ -181,6 +182,7 @@ try {
             image: req.file?.path ? catchImg : postById.image,
             title: req.body?.title ? req.body.title : postById.title ,
             text: req.body?.text ? req.body.text : postById.text ,
+            location: req.body?.location ? req.body.location : postById.location,
             author: postById.author,
             type: postById.type,
             likes: postById.likes,
@@ -270,6 +272,35 @@ try {
 }
 
 
+//! ---------------- SEARCH -----------------
+
+const searchPost = async (req,res,next) =>{
+
+try {
+  const { search } = req.body
+const postByTitleSearch = await Post.find({ title: {$regex : search, $options : "i"} }).populate('author likes')
+const postByTextSearch = await Post.find({ text: {$regex : search, $options : "i"} }).populate('author likes')
+
+
+if(postByTitleSearch[0] || postByTextSearch[0] ){
+  console.log('entro')
+  return res.status(200).json({
+    postByTitleSearch,
+    postByTextSearch
+  })
+}else{
+  return res.status(404).json('Not Found')
+}
+
+} catch (error) {
+  return res.status(500).json({
+    error: "Error en el catch",
+    message: error.message,
+  });
+}
+
+
+}
 
 
 
@@ -279,6 +310,22 @@ try {
 
 
 
+//! ----------------  GET BY LOCATION -----------------
+
+const getPostByLocation = async(req,res,next) =>{
+  const { location } = req.params;
+  try {
+    const postsByLocation = await Post.find({
+      location: { $in: location },
+    });
+    return res.status(200).json(postsByLocation);
+  } catch (error) {
+      return res.status(500).json({
+          error: "Error en el catch",
+          message: error.message,
+        });
+  }
+}
 
 
 
@@ -335,7 +382,9 @@ module.exports = {
   getPostById,
   getAllPostsPopulated,
   getAllPosts,
+  getPostByLocation,
   postByType,
   deletePost,
-  updatePost
+  updatePost,
+  searchPost
 };

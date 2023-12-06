@@ -2,9 +2,10 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema;
 const PostSchema = new Schema(
     {
-      text: { type: String, required: true },
-      image: { type: String, required: true },
-      type: { type: String, enum: ['Room Seeker', 'Roommate Seeker'], required: true },
+      title: { type: String, required: true, minLength: 10, maxLength: 50},
+      text: { type: String, required: true, minLength: 50, maxLength: 600 },
+      image: { type: String },
+      type: { type: String, enum: ['RoomSeeker', 'RoommateSeeker'], required: true },
       author: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
       // authorImage: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
       // authorName: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
@@ -19,3 +20,4 @@ const PostSchema = new Schema(
   const Post = mongoose.model('Post', PostSchema);
   module.exports = Post;
   
+

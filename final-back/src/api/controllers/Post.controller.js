@@ -9,34 +9,34 @@ const Comment = require("../models/Comment.model");
 const createPost = async (req, res) => {
   let catchImg = req.file?.path;   //TODO-------- ESTO TIENE QUE SER UN ARRAY DE FOTOS??? --------
   try {
+    
     await Post.syncIndexes();
-    const body = req.body;
-    const user = req.user;
+    const body = req?.body;
+    const newPost = new Post(req?.body)
+    const user = req?.user;
+    console.log('entro aqui', user._id)
 
-    const customBody = {
-      // sacamos la info  del usuario que publica en el feed(user), y luego del post que crea(body)
-      author: user._id,
-      // authorImage: user.image,
-      text: body.text,
-      type: body.type,
-      image: catchImg,
-    };
+    newPost.author = user._id
+    newPost.image = catchImg
+    newPost.title = body.title
+    newPost.text = body.text
+    newPost.type = body.type
+    console.log(newPost)
 
-    const newPost = new Post(customBody);
     const savedPost = await newPost.save();
 
     try {
       await User.findByIdAndUpdate(
-        creator, //? ----- hacemos que sea recíproco, y que se cree el comentario en el eleven
-        { $push: { posts: savedPost._id } }
+        user._id, //---- que se creen los posts en el user
+        { $push: { myPosts: savedPost._id } }
       );
 
       return res
         .status(savedPost ? 200 : 404)
         .json(savedPost ? savedPost : "Error saving post");
     } catch (error) {
-      return res.status(500).json({
-        error: "Error en el catch",
+      return res.status(404).json({
+        error: "no se encontro por id",
         message: error.message,
       });
     }
@@ -179,6 +179,7 @@ try {
 
             const customBody = {
             image: req.file?.path ? catchImg : postById.image,
+            title: req.body?.title ? req.body.title : postById.title ,
             text: req.body?.text ? req.body.text : postById.text ,
             author: postById.author,
             type: postById.type,
@@ -292,10 +293,10 @@ const deletePost = async (req, res) => {
 
     if (post) {
       try {
-        await User.updateMany({ posts: id, likes: id }, { $pull: { posts: id, likes: id }});
+        await User.updateMany({ myPosts: id, likedPosts: id }, { $pull: { myPosts: id, likedPosts: id }});
 
         try {
-            await Comment.updateMany({ posts: id }, { $pull: { posts: id, likes: id }});
+            await Comment.updateMany({ posts: id }, { posts: id });
 
                 const postById = await Post.findById(id)
 

@@ -123,7 +123,6 @@ const sendCode = async (req, res, next) => {
 
 //<!--SEC                                         isVerified EMAIL                                                   ->
 
-
 const newUserCheck = async (req, res, next) => {
   try {
     const { email, confirmationCode } = req.body;
@@ -422,143 +421,156 @@ const passwordChange = async (req, res, next) => {
 
 //<!--SEC                                          UPDATE USER                                                   ->
 
-// const updateUser = async (req, res, next) => {
-//   let catchImage = req.file?.path;
-//   try {
-//     await User.syncIndexes();
-//     const patchedUser = new User(req.body);
-//     req.file && (patchedUser.image = catchImage);
+const updateUser = async (req, res, next) => {
+  let catchImage = req.file?.path;
+  try {
+    await User.syncIndexes();
+    const patchedUser = new User(req.body);
+    req.file && (patchedUser.image = catchImage);
 
-//     patchedUser._id = req.user._id;
-//     patchedUser.password = req.user.password;
-//     patchedUser.role = req.user.role;
-//     patchedUser.confirmationEmailCode = req.user.confirmationEmailCode;
-//     patchedUser.userEmail = req.user.userEmail;
-//     patchedUser.isVerified = req.user.isVerified;
-//     patchedUser.favAlbums = req.user.favAlbums;
-//     patchedUser.favSongs = req.user.favSongs;
-//     patchedUser.followers = req.user.followers;
-//     patchedUser.following = req.user.following;
-//     patchedUser.gender = req.user.gender;
+    patchedUser._id = req.user._id;
+    patchedUser.password = req.user.password;
+    patchedUser.role = req.user.role;
+    patchedUser.confirmationCode = req.user.confirmationCode;
+    patchedUser.email = req.user.email;
+    patchedUser.isVerified = req.user.isVerified;
+    patchedUser.gender = req.user.gender;
+    patchedUser.username = req.user.username;
+    patchedUser.birthYear = req.user.birthYear;
+    patchedUser.name = req.body?.name ? req.body.name : req.user.name;
+    patchedUser.lastName = req.body?.lastName
+      ? req.body.lastName
+      : req.user.lastName;
+    patchedUser.description = req.body?.description
+      ? req.body.description
+      : req.user.description;
+    patchedUser.sentComments = req.user.sentComments;
+    patchedUser.receivedComments = req.user.receivedComments;
+    patchedUser.likedComments = req.user.likedComments;
+    patchedUser.savedRooms = req.user.savedRooms;
+    patchedUser.myPosts = req.user.myPosts;
+    patchedUser.likedPosts = req.user.likedPosts;
 
-//     // if (req.body?.gender) {
-//     //   const enumResult = enumOk(req.body?.gender);
-//     //   patchedUser.gender = enumResult.check
-//     //     ? req.body?.gender
-//     //     : req.user.gender;
-//     // }
+    if (req.body?.interests) {
+      const enumResult = enumCheck(req.body?.gender);
+      patchedUser.interests = enumResult.check
+        ? req.body?.interests
+        : req.user.interests;
+    }
 
-//     try {
-//       await User.findByIdAndUpdate(req.user._id, patchedUser);
-//       req.file && deleteImgCloudinary(req.user.userEmail);
+    try {
+      await User.findByIdAndUpdate(req.user._id, patchedUser);
+      req.file && deleteImgCloudinary(req.user.userEmail);
 
-//       //------testing---------
-//       const updatedUser = await User.findById(req.user._id);
-//       const updatedKeys = Object.keys(req.body);
-//       const testingUpdate = [];
+      //------testing---------
+      const updatedUser = await User.findById(req.user._id);
+      const updatedKeys = Object.keys(req.body);
+      const testingUpdate = [];
 
-//       updatedKeys.forEach((item) => {
-//         if (updatedUser[item] === req.body[item]) {
-//           if (updatedUser[item] != req.user[item]) {
-//             testingUpdate.push({ [item]: true });
-//           } else {
-//             testingUpdate.push({ [item]: "Information is the same." });
-//           }
-//         } else {
-//           testingUpdate.push({ [item]: false });
-//         }
+      updatedKeys.forEach((item) => {
+        if (updatedUser[item] === req.body[item]) {
+          if (updatedUser[item] != req.user[item]) {
+            testingUpdate.push({ [item]: true });
+          } else {
+            testingUpdate.push({ [item]: "Information is the same." });
+          }
+        } else {
+          testingUpdate.push({ [item]: false });
+        }
 
-//         if (req.file) {
-//           updatedUser.image === catchImage
-//             ? testingUpdate.push({ image: true })
-//             : testingUpdate.push({ image: false });
-//         }
-//         return res.status(200).json({ updatedUser, testingUpdate });
-//       });
-//     } catch (error) {
-//       return res
-//         .status(404)
-//         .json({ error: "Error in updating the user", message: error.message });
-//     }
-//   } catch (error) {
-//     req.file && deleteImgCloudinary(catchImage);
-//     return next(
-//       setError(500, error.message || "Error in update general catch.")
-//     );
-//   }
-// };
+        if (req.file) {
+          updatedUser.image === catchImage
+            ? testingUpdate.push({ image: true })
+            : testingUpdate.push({ image: false });
+        }
+        return res.status(200).json({ updatedUser, testingUpdate });
+      });
+    } catch (error) {
+      return res
+        .status(404)
+        .json({ error: "Error in updating the user", message: error.message });
+    }
+  } catch (error) {
+    req.file && deleteImgCloudinary(catchImage);
+    return (
+      res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      }) && next(error)
+    );
+  }
+};
 
 // //<!--SEC                                        DELETE USER                                                     ->
 
-// const deleteUser = async (req, res) => {
-//   try {
-//     console.log(req?.user?.password, "passsssss");
-//     const _id = req?.user?._id;
-//     // I could also grab the pass and email through the req.user but I thought it safer this way.
-//     const dataBaseUser = await User.findById(_id);
-//     if (bcrypt.compareSync(req.body.password, req.user.password)) {
-//       try {
-//         await User.findByIdAndDelete(req.user?._id);
-//         deleteImgCloudinary(dataBaseUser.image);
-//         try {
-//           try {
-//             await Song.updateMany(
-//               { likedBy: _id },
-//               { $pull: { likedBy: _id } }
-//             );
-//             try {
-//               await Album.updateMany(
-//                 { likedBy: _id },
-//                 { $pull: { likedBy: _id } }
-//               );
-//               try {
-//                 await User.updateMany(
-//                   { following: _id },
-//                   { $pull: { following: _id } }
-//                 );
-//                 try {
-//                   await User.updateMany(
-//                     { followers: _id },
-//                     { $pull: { followers: _id } }
-//                   );
-//                 } catch (error) {
-//                   return res.status(404).json("Error pulling followers.");
-//                 }
-//               } catch (error) {
-//                 return res.status(404).json("Error pulling following.");
-//               }
-//             } catch (error) {
-//               return res.status(404).json("Error pulling albums.");
-//             }
-//           } catch (error) {
-//             return res.status(404).json("Error pulling songs");
-//           }
-//         } catch (error) {
-//           return res
-//             .status(404)
-//             .json("Error updating references to other models.");
-//         }
-//         const doesUserExist = await User.findById(req.user._id);
-//         console.log(doesUserExist);
-//         return res
-//           .status(doesUserExist ? 404 : 200)
-//           .json(
-//             doesUserExist
-//               ? "User not deleted. Please try again."
-//               : "User deleted successfully."
-//           );
-//       } catch (error) {
-//         return res.status(500).json("Error in delete catch");
-//       }
-//     } else {
-//       return res
-//         .status(404)
-//         .json("Error in input fields, please check spelling and try again.");
-//     }
-//   } catch (error) {
-//     return res.status(404).json(error.message);
-//   }
-// };
+const deleteUser = async (req, res) => {
+  try {
+    console.log(req?.user?.password, "password");
+    const _id = req?.user?._id;
+    // I could also grab the pass and email through the req.user but I thought it safer this way.
+    const dataBaseUser = await User.findById(_id);
+    if (bcrypt.compareSync(req.body.password, req.user.password)) {
+      try {
+        await User.findByIdAndDelete(req.user?._id);
+        deleteImgCloudinary(dataBaseUser.image);
+        try {
+          try {
+            await sentComments.deleteMany(
+              { likedBy: _id },
+            );
+            try {
+              await Album.updateMany(
+                { likedBy: _id },
+                { $pull: { likedBy: _id } }
+              );
+              try {
+                await User.updateMany(
+                  { following: _id },
+                  { $pull: { following: _id } }
+                );
+                try {
+                  await User.updateMany(
+                    { followers: _id },
+                    { $pull: { followers: _id } }
+                  );
+                } catch (error) {
+                  return res.status(404).json("Error pulling followers.");
+                }
+              } catch (error) {
+                return res.status(404).json("Error pulling following.");
+              }
+            } catch (error) {
+              return res.status(404).json("Error pulling albums.");
+            }
+          } catch (error) {
+            return res.status(404).json("Error pulling songs");
+          }
+        } catch (error) {
+          return res
+            .status(404)
+            .json("Error updating references to other models.");
+        }
+        const doesUserExist = await User.findById(req.user._id);
+        console.log(doesUserExist);
+        return res
+          .status(doesUserExist ? 404 : 200)
+          .json(
+            doesUserExist
+              ? "User not deleted. Please try again."
+              : "User deleted successfully."
+          );
+      } catch (error) {
+        return res.status(500).json("Error in delete catch");
+      }
+    } else {
+      return res
+        .status(404)
+        .json("Error in input fields, please check spelling and try again.");
+    }
+  } catch (error) {
+    return res.status(404).json(error.message);
+  }
+};
 
 module.exports = {
   redirectRegister,
@@ -570,6 +582,6 @@ module.exports = {
   passwordChange,
   sendPassword,
   passChangeWhileLoggedOut,
-  // updateUser,
+  updateUser,
   // deleteUser,
 };

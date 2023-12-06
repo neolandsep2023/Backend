@@ -16,6 +16,9 @@ const bcrypt = require("bcrypt");
 //<!--IMP                                             MODELS                                                     ->
 const User = require("../models/User.model");
 const interestsEnum = require("../../data/interestsEnum");
+const Post = require("../models/Post.model");
+const Room = require("../models/Room.model");
+const Comment = require("../models/Comment.model");
 
 //<!--SEC                                   REDIRECT  REGISTRATION                                                   ->
 
@@ -501,49 +504,65 @@ const updateUser = async (req, res, next) => {
   }
 };
 
-// //<!--SEC                                        DELETE USER                                                     ->
+//<!--SEC                                        DELETE USER                                                     ->
 
-const deleteUser = async (req, res) => {
+const deleteUser = async (req, res, next) => {
   try {
     console.log(req?.user?.password, "password");
     const _id = req?.user?._id;
     // I could also grab the pass and email through the req.user but I thought it safer this way.
     const dataBaseUser = await User.findById(_id);
     if (bcrypt.compareSync(req.body.password, req.user.password)) {
+      //le he puesto para que meta su contrasena antes de borrar su usuario :)
       try {
         await User.findByIdAndDelete(req.user?._id);
         deleteImgCloudinary(dataBaseUser.image);
         try {
           try {
-            await sentComments.deleteMany(
-              { likedBy: _id },
-            );
+            await Comments.deleteMany({ creator: _id });
             try {
-              await Album.updateMany(
-                { likedBy: _id },
-                { $pull: { likedBy: _id } }
+              await Comment.updateMany(
+                { likes: _id },
+                { $pull: { likes: _id } }
               );
               try {
-                await User.updateMany(
-                  { following: _id },
-                  { $pull: { following: _id } }
+                await Room.updateMany(
+                  { likes: _id },
+                  { $pull: { likes: _id } }
                 );
                 try {
-                  await User.updateMany(
-                    { followers: _id },
-                    { $pull: { followers: _id } }
-                  );
+                  await Room.deleteMAny({ postedBy: _id });
+                  try {
+                    await Post.deleteMany({ author: _id });
+                    try {
+                      await Post.updateMany(
+                        { likes: _id },
+                        { $pull: { likes: _id } }
+                      );
+                      try {
+                        
+                      } catch (error) {
+                        return res.status(404).json("Error pulling references")
+                      }
+                    } catch (error) {
+                      return res
+                        .status(404)
+                        .json("Error updating likes in posts.");
+                    }
+                  } catch (error) {
+                    return res.status(404).json("Error deleting posts");
+                  }
                 } catch (error) {
-                  return res.status(404).json("Error pulling followers.");
+                  return res.status(404).json("Error deleting room announcements.");
                 }
               } catch (error) {
-                return res.status(404).json("Error pulling following.");
+                return res.status(404).json("Error pulling rooms likes.");
               }
             } catch (error) {
-              return res.status(404).json("Error pulling albums.");
+              return res.status(404).json("Error pulling comments likes.");
             }
           } catch (error) {
-            return res.status(404).json("Error pulling songs");
+            return res.status(404).json("Error deleting comments.");
           }
         } catch (error) {
           return res
@@ -568,9 +587,136 @@ const deleteUser = async (req, res) => {
         .json("Error in input fields, please check spelling and try again.");
     }
   } catch (error) {
-    return res.status(404).json(error.message);
+    return res.status(500).json({
+      error: "Error en el catch",
+      message: error.message,
+    }) && next(error)
   }
 };
+
+//<!--SEC                                        GET ALL                                                     ->
+const getAll = async (req, res, next) => {
+  try {
+    const allUsers = await User.find();
+    if (allUsers.length > 0) {
+      return res.status(200).json(allUsers);
+    } else {
+      return res.status(404).json('No users in the database.');
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error en el catch",
+      message: error.message,
+    }) && next(error)
+  }
+};
+
+
+//<!--SEC                                        GET BY ID                                                     ->
+const getUserById = async (req, res, next) => {
+  try {
+    const { id } = req.body;
+    const userById = await User.findById(id);
+    if (userById) {
+      return res.status(200).json(userById);
+    } else {
+      return res.status(404).json("That user doesn't exist.");
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error en el catch",
+      message: error.message,
+    }) && next(error)
+  }
+};
+
+
+
+
+//<!--SEC                                        GET BY NAME                                                     ->
+
+const getByName = async (req, res, next) => {
+  //es para name y para userName!!
+  try {
+    console.log(req.body);
+    let { name } = req.body;
+
+    console.log(name);
+    const UsersByName = await User.find({$or: [{name:{$regex: name, $options:'i'}}, {username:{$regex: name, $options:'i'}}]});
+    console.log(UsersByName);
+    if (UsersByName.length > 0) {
+      return res.status(200).json(UsersByName);
+    } else {
+      return res
+        .status(404)
+        .json("That username doesn't show up in our database.");
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error en el catch",
+      message: error.message,
+    }) && next(error)
+  }
+};
+
+
+
+//<!--SEC                                        GET BY AGE                                                     ->
+const getByAge = async(req, res, next) => {
+  try {
+    let { age } = req.body;
+    const currentYear = new Date().getFullYear();
+    const targetYear = currentYear - age.parseInt();
+    let range;
+    let filter
+    if (req.body?.range) {
+      range = req.body.range;
+      range = parseInt(range);
+      console.log(range);
+    } else {
+      range = 2;
+    }
+    if (req.body?.filter) {
+      filter = req.body.filter === 'des' ? -1 : 1; //I could set a switch but in pos of a selector that only lets you have two values, i wont
+    }
+    let baseYear = targetYear.parseInt();
+    let younger = baseYear + range;
+    let older = baseYear - range;
+    console.log(older, baseYear, younger);
+    try {
+      const userResults = await User.find({
+        $and: [
+          { birthYear: { $gte: older } },
+          { birthYear: { $lte: younger } },
+        ],
+      }).sort({ birthYear: filter });
+      if (userResults.length > 0) {
+        return res.status(200).json(userResults);
+      } else {
+        return res
+          .status(404)
+          .json("Couldn't find any users with that age.");
+      }
+    } catch (error) {
+      return res.status(404).json('Error finding users catch.');
+    }
+  } catch (error) {
+    return res.status(404).json('Error in length Switch clause.');
+  }
+}
+
+
+//<!--SEC                                        DELETE USER                                                     ->
+//<!--SEC                                        DELETE USER                                                     ->
+//<!--SEC                                        DELETE USER                                                     ->
+
+
+
+
+
+
+
+
 
 module.exports = {
   redirectRegister,
@@ -583,5 +729,9 @@ module.exports = {
   sendPassword,
   passChangeWhileLoggedOut,
   updateUser,
-  // deleteUser,
+  deleteUser,
+  getAll,
+  getUserById,
+  getByName,
+  getByAge,
 };

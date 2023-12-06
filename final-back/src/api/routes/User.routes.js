@@ -12,6 +12,11 @@ const {
   sendPassword,
   passwordChange,
   updateUser,
+  deleteUser,
+  getAll,
+  getUserById,
+  getByName,
+  getByAge,
 } = require("../controllers/User.controller");
 
 //!--------ROUTES----------------------------------------------
@@ -40,6 +45,14 @@ UserRoutes.patch(
   upload.single("image"),
   updateUser
 );
+UserRoutes.delete("/deleteUser", [isAuth], deleteUser)
+UserRoutes.get("/getAll", [isAuth], getAll)
+UserRoutes.get("/getById/:id", [isAuth], getUserById)
+UserRoutes.get("/byName/name", [isAuth], getByName)
+UserRoutes.get("/byAge/age", [isAuth], getByAge)
+
+
+
 
 //!-------REDIRECTS--------------------------------------------
 

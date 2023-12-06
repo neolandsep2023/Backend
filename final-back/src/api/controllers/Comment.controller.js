@@ -45,17 +45,17 @@ const createCommentPost = async (req, res, next) => {
   try {
     await Comment.syncIndexes();
     const { commentPost } = req.params;
-    const creator = req.user._id;
+    const creator = req.user;
     const body = req.body;
     const postComentado = await User.findById(commentPost);
 
     const customBody = {
-      creator: creator,
-      nameComentador: req.user.name, //?Persona comentante
+      creator: creator._id,
+      nameComentador:creator.name, //?Persona comentante
       commentPost: commentPost,
       textComment: body.textComment,
       rating: body.rating,
-      image: req.user.image,   //?Persona comentante
+      image: creator.image,   //?Persona comentante
     };
     const newComment = new Comment(customBody);
     const saveComment = await newComment.save();
@@ -239,8 +239,10 @@ const deleteComment = async (req, res, next) => {
       return res.status(404).json('este comentario no existe ❌'); //? si no existe el jugador antes de eliminarlo hay que dar error porque el jugador seleccionado para borrar no existia en un primer momento
     }
   } catch (error) {
-    return res.status(500)
-      .json ("Error reading comments");
+    return res.status(500).json({
+      error: 'Error en el catch',
+      message: error.message,
+    });
   }
 };
 

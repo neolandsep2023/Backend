@@ -30,7 +30,7 @@ const createRoom = async (req, res, next) => {
 
 //! ------------------ UPDATE ------------------
 const updateRoom = async (req, res, next) => {
-  await Room.syncIn2dexes();
+  await Room.syncIndexes();
   let catchImg = req.files
   try {
     const { id } = req.params;

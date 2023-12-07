@@ -34,8 +34,6 @@ app.use(express.urlencoded({ limit: '5mb', extended: false }));
 const RoomRoutes = require('./src/api/routes/Room.routes');
 app.use("/api/v1/rooms/", RoomRoutes);
 
-const AdvertisementRoutes = require('./src/api/routes/Advertisement.routes');
-app.use("/api/v1/advertisements/", AdvertisementRoutes)
 
 const CommentRoutes = require('./src/api/routes/Comments.routes');
 app.use("/api/v1/comments/", CommentRoutes)

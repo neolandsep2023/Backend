@@ -1,4 +1,5 @@
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
+const enumCheck = require("../../utils/enumCheck");
 const Room = require("../models/Room.model");
 const User = require("../models/User.model");
 
@@ -213,6 +214,20 @@ const getByName = async (req, res, next) => {
   }
 }
 
+//! ------------------ GET by LOCATION ------------------
+const getByLocation = async (req, res, next) => {
+  try {
+    const { location } = req.params;
+    const roomByLocation = await Room.find({ publicLocation: {$regex: name, $options: "i"}}).populate("postedBy")
+    return roomByName ? res.status(200).json(roomByName) : res.status(404).json("we couldn't find the room")
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error en el catch",
+      message: error.message,
+    })
+  }
+}
+
 //! ------------------ GET ALL ------------------
 const getAll = async (req, res, next) => {
   try {
@@ -299,6 +314,30 @@ const filterRooms = async (req, res, next) => {
   }
 }
 
+//! ------------------ FILTER ENUM ------------------
+const filterEnumRooms = async (req, res, next) => {
+  try {
+    const { filter, value } = req.params;
+    const roomFinds = await Room.find({ [filter]: value}).populate("postedBy")
+    switch (filter) {
+      case "type":
+        if (enumCheck("type", value)) {
+
+        } else {
+          return res.status(404).json("We couldn't find matching housing types in the db")
+        }
+        break;
+    
+      default:
+        break;
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error en el catch",
+      message: error.message
+    })
+  }
+}
 
 module.exports = {
   createRoom,

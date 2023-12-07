@@ -128,7 +128,6 @@ const sendCode = async (req, res, next) => {
 //<!--SEC                                         isVerified EMAIL                                                   ->
 //WORKS CORRECTLY
 
-
 const newUserCheck = async (req, res, next) => {
   try {
     const { email, confirmationCode } = req.body;
@@ -176,7 +175,6 @@ const newUserCheck = async (req, res, next) => {
 
 //<!--SEC                                         RESEND EMAIL                                                   ->
 //WORKS CORRECTLY
-
 
 const resendCode = async (req, res, next) => {
   //ESTA ES LA UNICA QUE ES ASINCRONA DE MANDAR UN CODIGO
@@ -287,7 +285,6 @@ const autoLogin = async (req, res, next) => {
 //<!--SEC                                  PASSWORD CHANGE WHILE LOGGED OUT                                   ->
 //WORKS CORRECTLY
 
-
 const passChangeWhileLoggedOut = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -384,7 +381,6 @@ const sendPassword = async (req, res, next) => {
 
 //<!--SEC                                           PASSWORD CHANGE                                              ->
 //WORKS CORRECTLY
-
 
 const passwordChange = async (req, res, next) => {
   try {
@@ -551,9 +547,8 @@ const deleteUser = async (req, res, next) => {
                         { $pull: { likes: _id } }
                       );
                       try {
-                        
                       } catch (error) {
-                        return res.status(404).json("Error pulling references")
+                        return res.status(404).json("Error pulling references");
                       }
                     } catch (error) {
                       return res
@@ -564,7 +559,9 @@ const deleteUser = async (req, res, next) => {
                     return res.status(404).json("Error deleting posts");
                   }
                 } catch (error) {
-                  return res.status(404).json("Error deleting room announcements.");
+                  return res
+                    .status(404)
+                    .json("Error deleting room announcements.");
                 }
               } catch (error) {
                 return res.status(404).json("Error pulling rooms likes.");
@@ -598,10 +595,12 @@ const deleteUser = async (req, res, next) => {
         .json("Error in input fields, please check spelling and try again.");
     }
   } catch (error) {
-    return res.status(500).json({
-      error: "Error en el catch",
-      message: error.message,
-    }) && next(error)
+    return (
+      res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      }) && next(error)
+    );
   }
 };
 
@@ -614,16 +613,17 @@ const getAll = async (req, res, next) => {
     if (allUsers.length > 0) {
       return res.status(200).json(allUsers);
     } else {
-      return res.status(404).json('No users in the database.');
+      return res.status(404).json("No users in the database.");
     }
   } catch (error) {
-    return res.status(500).json({
-      error: "Error en el catch",
-      message: error.message,
-    }) && next(error)
+    return (
+      res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      }) && next(error)
+    );
   }
 };
-
 
 //<!--SEC                                        GET BY ID                                                     ->
 //WORKS CORRECTLY
@@ -637,15 +637,37 @@ const getUserById = async (req, res, next) => {
       return res.status(404).json("That user doesn't exist.");
     }
   } catch (error) {
-    return res.status(500).json({
-      error: "Error en el catch",
-      message: error.message,
-    }) && next(error)
+    return (
+      res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      }) && next(error)
+    );
   }
 };
 
-
-
+//<!--SEC                                        GET BY ID                                                     ->
+//WORKS CORRECTLY
+const getUserByIdPopulated = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userById = await User.findById(id).populate(
+      "sentComments receivedComments likedComments savedRooms myPosts myRooms likedPosts"
+    );
+    if (userById) {
+      return res.status(200).json(userById);
+    } else {
+      return res.status(404).json("That user doesn't exist.");
+    }
+  } catch (error) {
+    return (
+      res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      }) && next(error)
+    );
+  }
+};
 
 //<!--SEC                                        GET BY NAME                                                     ->
 //WORKS CORRECTLY
@@ -657,7 +679,12 @@ const getByName = async (req, res, next) => {
     let { name } = req.body;
 
     console.log(name);
-    const UsersByName = await User.find({$or: [{name:{$regex: name, $options:'i'}}, {username:{$regex: name, $options:'i'}}]});
+    const UsersByName = await User.find({
+      $or: [
+        { name: { $regex: name, $options: "i" } },
+        { username: { $regex: name, $options: "i" } },
+      ],
+    });
     console.log(UsersByName);
     if (UsersByName.length > 0) {
       return res.status(200).json(UsersByName);
@@ -667,23 +694,23 @@ const getByName = async (req, res, next) => {
         .json("That username doesn't show up in our database.");
     }
   } catch (error) {
-    return res.status(500).json({
-      error: "Error en el catch",
-      message: error.message,
-    }) && next(error)
+    return (
+      res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      }) && next(error)
+    );
   }
 };
 
-
-
 //<!--SEC                                        GET BY AGE                                                     ->
-const getByAge = async(req, res, next) => {
+const getByAge = async (req, res, next) => {
   try {
     let { age } = req.body;
     const currentYear = new Date().getFullYear();
     const targetYear = currentYear - parseInt(age);
     let range;
-    let filter
+    let filter;
     if (req.body?.range) {
       range = req.body.range;
       range = parseInt(range);
@@ -692,7 +719,7 @@ const getByAge = async(req, res, next) => {
       range = 2;
     }
     if (req.body?.filter) {
-      filter = req.body.filter === 'des' ? -1 : 1; //I could set a switch but in pos of a selector that only lets you have two values, i wont
+      filter = req.body.filter === "des" ? -1 : 1; //I could set a switch but in pos of a selector that only lets you have two values, i wont
     }
     let baseYear = parseInt(targetYear);
     let younger = baseYear + range;
@@ -708,26 +735,25 @@ const getByAge = async(req, res, next) => {
       if (userResults.length > 0) {
         return res.status(200).json(userResults);
       } else {
-        return res
-          .status(404)
-          .json("Couldn't find any users with that age.");
+        return res.status(404).json("Couldn't find any users with that age.");
       }
     } catch (error) {
-      return res.status(404).json('Error finding users catch.');
+      return res.status(404).json("Error finding users catch.");
     }
   } catch (error) {
-    return res.status(500).json({
-      error: "Error en el catch",
-      message: error.message,
-    }) && next(error)
+    return (
+      res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      }) && next(error)
+    );
   }
-}
-
+};
 
 //<!--SEC                                        TOGGLE LIKE                                                     ->
 const toggleLikedPost = async (req, res, next) => {
   try {
-    console.log('body y user', req.body, req.user);
+    console.log("body y user", req.body, req.user);
     const { id } = req.params;
     const { _id, likedPosts } = req.user;
     if (likedPosts.includes(id)) {
@@ -744,10 +770,10 @@ const toggleLikedPost = async (req, res, next) => {
             postUnfavorited: await Post.findById(id),
           });
         } catch (error) {
-          return res.status(404).json('Error in pulling user from likes.');
+          return res.status(404).json("Error in pulling user from likes.");
         }
       } catch (error) {
-        return res.status(404).json('Error in pulling post from LikedPosts.');
+        return res.status(404).json("Error in pulling post from LikedPosts.");
       }
     } else {
       try {
@@ -765,25 +791,27 @@ const toggleLikedPost = async (req, res, next) => {
         } catch (error) {
           return res.status(404).json({
             error: error.message,
-            message: 'Error in pushing our id to likes in post.',
+            message: "Error in pushing our id to likes in post.",
           });
         }
       } catch (error) {
-        return res.status(404).json('Error in pushing post to likedPosts.');
+        return res.status(404).json("Error in pushing post to likedPosts.");
       }
     }
   } catch (error) {
-    return res.status(500).json({
-      error: "Error en el catch",
-      message: error.message,
-    }) && next(error)
+    return (
+      res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      }) && next(error)
+    );
   }
 };
 
 //<!--SEC                                        TOGGLE LIKED COMMENTS                                                     ->
 const toggleLikedComment = async (req, res, next) => {
   try {
-    console.log('body y user', req.body, req.user);
+    console.log("body y user", req.body, req.user);
     const { id } = req.params;
     const { _id, likedComments } = req.user;
     if (likedComments.includes(id)) {
@@ -800,10 +828,12 @@ const toggleLikedComment = async (req, res, next) => {
             commentUnfavorited: await Comment.findById(id),
           });
         } catch (error) {
-          return res.status(404).json('Error in pulling user from likes.');
+          return res.status(404).json("Error in pulling user from likes.");
         }
       } catch (error) {
-        return res.status(404).json('Error in pulling comment from likedComments.');
+        return res
+          .status(404)
+          .json("Error in pulling comment from likedComments.");
       }
     } else {
       try {
@@ -821,26 +851,27 @@ const toggleLikedComment = async (req, res, next) => {
         } catch (error) {
           return res.status(404).json({
             error: error.message,
-            message: 'Error in pushing our id to likes in comment.',
+            message: "Error in pushing our id to likes in comment.",
           });
         }
       } catch (error) {
-        return res.status(404).json('Error in pushing post to likedComments.');
+        return res.status(404).json("Error in pushing post to likedComments.");
       }
     }
   } catch (error) {
-    return res.status(500).json({
-      error: "Error en el catch",
-      message: error.message,
-    }) && next(error)
+    return (
+      res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      }) && next(error)
+    );
   }
 };
-
 
 //<!--SEC                                        TOGGLE SAVED ROOM                                                     ->
 const saveRoom = async (req, res, next) => {
   try {
-    console.log('body y user', req.body, req.user);
+    console.log("body y user", req.body, req.user);
     const { id } = req.params;
     const { _id, savedRooms } = req.user;
     if (savedRooms.includes(id)) {
@@ -857,10 +888,10 @@ const saveRoom = async (req, res, next) => {
             roomUnfavorited: await Room.findById(id),
           });
         } catch (error) {
-          return res.status(404).json('Error in pulling user from likes.');
+          return res.status(404).json("Error in pulling user from likes.");
         }
       } catch (error) {
-        return res.status(404).json('Error in pulling room from likedRooms.');
+        return res.status(404).json("Error in pulling room from likedRooms.");
       }
     } else {
       try {
@@ -878,29 +909,23 @@ const saveRoom = async (req, res, next) => {
         } catch (error) {
           return res.status(404).json({
             error: error.message,
-            message: 'Error in pushing our id to likes in room.',
+            message: "Error in pushing our id to likes in room.",
           });
         }
       } catch (error) {
-        return res.status(404).json('Error in pushing room to savedRooms.');
+        return res.status(404).json("Error in pushing room to savedRooms.");
       }
     }
   } catch (error) {
-    return res.status(500).json({
-      error: "Error en el catch",
-      message: error.message,
-    }) && next(error)
+    return (
+      res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      }) && next(error)
+    );
   }
 };
 //<!--SEC                                        DELETE USER                                                     ->
-
-
-
-
-
-
-
-
 
 module.exports = {
   redirectRegister,
@@ -916,6 +941,7 @@ module.exports = {
   deleteUser,
   getAll,
   getUserById,
+  getUserByIdPopulated,
   getByName,
   getByAge,
   toggleLikedComment,

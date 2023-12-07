@@ -82,6 +82,7 @@ const UserSchema = new mongoose.Schema(
     //pusheados al mismo mongoChat del usuario loggeado
     // privateComments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
     myPosts: [{type: mongoose.Schema.Types.ObjectId, ref: "Post"}],
+    myRooms: [{type: mongoose.Schema.Types.ObjectId, ref: "Room"}],
     likedPosts: [{type: mongoose.Schema.Types.ObjectId, ref: "Post"}],
   },
   {

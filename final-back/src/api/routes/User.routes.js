@@ -20,6 +20,7 @@ const {
   toggleLikedPost,
   saveRoom,
   toggleLikedComment,
+  getUserByIdPopulated,
 } = require("../controllers/User.controller");
 
 //!--------ROUTES----------------------------------------------
@@ -51,6 +52,7 @@ UserRoutes.patch(
 UserRoutes.delete("/deleteUser", [isAuth], deleteUser)
 UserRoutes.get("/getAll", [isAuth], getAll)
 UserRoutes.get("/getById/:id", [isAuth], getUserById)
+UserRoutes.get("/getById/:id", [isAuth], getUserByIdPopulated)
 UserRoutes.get("/byName/name", [isAuth], getByName)
 UserRoutes.get("/byAge/age", [isAuth], getByAge)
 UserRoutes.patch("/likeRoom/:id", [isAuth], toggleLikedComment)

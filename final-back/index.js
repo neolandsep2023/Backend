@@ -44,6 +44,9 @@ app.use("/api/v1/posts/", PostRoutes)
 const UserRoutes = require('./src/api/routes/User.routes');
 app.use("/api/v1/users/", UserRoutes)
 
+const ChatRoutes = require('./src/api/routes/Chat.routes');
+app.use("/api/v1/chats/", ChatRoutes)
+
 
 //?--------------------------------------------------------------------------
 //?-----------------------Poner servidor a funcionar---------------------------------

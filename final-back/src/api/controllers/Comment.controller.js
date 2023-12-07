@@ -235,7 +235,7 @@ const createUserReview = async (req, res, next) => {
 
 const getAll = async (req, res, next) => {
   try {
-    const allComments = await Comment.find();
+    const allComments = await Comment.find({ type: 'public' });
     if (allComments) {
       return res.status(200).json(allComments);
     } else {

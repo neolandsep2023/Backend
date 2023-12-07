@@ -2,305 +2,168 @@ const User = require("../models/User.model");
 const Comment = require("../models/Comment.model");
 const Chat = require("../models/Chat.model");
 
-
-//const { ObjectId } = require("mongodb");
-
-//! -----------------------------------------------------------------------------
-//? ----------------------------CREATE-------------------------------------------
-//! -----------------------------------------------------------------------------
-const createChat = async (req, res, next) => {
-  try {
-    console.log(req.body.referenceOfferComment);
-    const { userOne, userTwo } = req.body;
-
-    const chatExistOne = await User.findOne({ userOne, userTwo });
-
-    const chatExistTwo = await User.findOne({
-      userOne: userTwo,
-      userTwo: userOne,
-    });
-
-    if (!chatExistOne && !chatExistTwo) {
-      const newChat = new Chat(req.body);
-      try {
-        await newChat.save();
-        const findNewChat = await Chat.findById(newChat._id);
-        if (findNewChat) {
-          try {
-            const userOneFind = await User.findById(userOne);
-
-            await userOneFind.updateOne({
-              $push: { chats: newChat._id },
-            });
-
-            try {
-              const userTwoFind = await User.findById(userTwo);
-              await userTwoFind.updateOne({
-                $push: { chats: newChat._id },
-              });
-              return res.status(200).json({
-                ChatSave: true,
-                chat: await Chat.findById(newChat._id),
-                userOneUpdate: await User.findById(userOne),
-                userTwoUpdate: await User.findById(userTwo),
-              });
-            } catch (error) {
-              return res.status(404).json("Dont update userTwo");
-            }
-          } catch (error) {
-            return res.status(404).json("Dont update userOne");
-          }
-        }
-      } catch (error) {
-        return res.status(404).json(error.message);
-      }
-    } else {
-      return res.status(404).json({ ChatExist: true });
-    }
-  } catch (error) {
-    return next(error);
-  }
-};
-
 // //! -----------------------------------------------------------------------------
 // //? -----------------------------CREATE NEW COMMENT -----------------------------
 // //! -----------------------------------------------------------------------------
 // //?------------------------------------------------------------------------------
 
 const newComment = async (req, res, next) => {
+  //el newComment va a hacerlo todo: checkear si hay un chat ya existente, ya sea con
+  //el usuario que hace la peticion como userOne o como userTwo
   try {
+    const commentBody = {
+      textComment: req.body.textComment,
+      creator: req.user._id,
+      commentType: "privado",
+      commentedUser: req.body.otherUser,
+    };
+    const newComment = new Comment(commentBody);
     try {
-      const commentBody = {
-        commentContent: req.body.commentContent,
-        owner: req.user._id,
-        commentType: "privado",
-        commentedUser: req.body.commentedUser,
-      };
-      const newComment = new Comment(commentBody);
-      try {
-        const savedComment = await newComment.save();
+      const savedComment = await newComment.save();
 
-        if (savedComment) {
+      if (savedComment) {
+        try {
+          await User.findByIdAndUpdate(req.user._id, {
+            $push: { sentComments: newComment._id },
+          });
           try {
-            await User.findByIdAndUpdate(req.user._id, {
-              $push: { commentsByMe: newComment._id },
+            await User.findByIdAndUpdate(req.body.otherUser, {
+              $push: { receivedComments: newComment._id },
             });
             try {
-              if (req.body.referenceOfferComment) {
-                console.log("entro en la 91");
-                await Offer.findByIdAndUpdate(req.body.referenceOfferComment, {
-                  $push: { comments: newComment._id },
-                });
+              const userOne = req.user._id;
+              const userTwo = req.body.otherUser;
+              // const userTwo = req.body.referenceUser
+              //   ? req.body.referenceUser
+              //   : userReal.owner[0]._id;
+
+              const chatExistOne = await Chat.findOne({
+                userOne,
+                userTwo,
+              });
+              //aqui busca un chat donde userOne tenga nuestro id y userTwo el id del recipiente
+
+              const chatExistTwo = await Chat.findOne({
+                userOne: userTwo,
+                userTwo: userOne,
+              });
+              //aqui lo busco a la inversa, porque puede que el primer mensaje no lo haya
+              //mandado yo, es decir, no seria userOne en el modelo de chat
+
+              if (!chatExistOne && !chatExistTwo) {
+                //si no existe ninguna de las dos, se crea un nuevo chat con
+                // userOne : userOne._id + userTwo: userTwo._id
+                //el user del mensajero (nosotros) y el recipiente
+                console.log("Esto es un chat nuevo");
+                const newChat = new Chat({ userOne, userTwo });
+                newChat.comments.push(newComment._id);
+                //pusheamos el id del mensaje mandado al nuevo chat
                 try {
-                  const userReal = await Offer.findById(
-                    req.body.referenceOfferComment
-                  ).populate("owner");
-                  await User.findByIdAndUpdate(userReal.owner[0]._id, {
-                    $push: { commentsByOthers: newComment._id },
-                  });
-
-                  const userOne = req.user._id;
-                  const userTwo = req.body.referenceUser
-                    ? req.body.referenceUser
-                    : userReal.owner[0]._id;
-
-                  const chatExistOne = await Chat.findOne({
-                    userOne: req.user._id,
-                    userTwo: req.body.referenceUser
-                      ? req.body.referenceUser
-                      : userReal.owner[0]._id,
-                  });
-                  console.log();
-                  const chatExistTwo = await Chat.findOne({
-                    userTwo: req.user._id,
-                    userOne: req.body.referenceUser
-                      ? req.body.referenceUser
-                      : userReal.owner[0]._id,
-                  });
-
-                  console.log(chatExistOne);
-                  console.log(chatExistTwo);
-
-                  if (!chatExistOne && !chatExistTwo) {
-                    console.log("ENTRO POR EL IF");
-                    console.log({ userOne, userTwo });
-                    const newChat = new Chat({ userOne, userTwo });
-                    newChat.menssages = [newComment._id];
+                  await newChat.save();
+                  //guardamos la nueva instancia de chat, con su primer mensaje y los ids
+                  //ya asentados de los dos participantes
+                  const findNewChat = await Chat.findById(newChat._id);
+                  if (findNewChat) {
                     try {
-                      await newChat.save();
-                      const findNewChat = await Chat.findById(newChat._id);
-                      if (findNewChat) {
-                        try {
-                          await User.findByIdAndUpdate(userOne, {
-                            $push: { chats: newChat._id },
-                          });
+                      //aqui vamos a meter el chat creado en los chats del usuario
+                      await User.findByIdAndUpdate(userOne, {
+                        $push: { chats: newChat._id },
+                      });
 
-                          try {
-                            await User.findByIdAndUpdate(userTwo, {
-                              $push: { chats: newChat._id },
-                            });
-                            return res.status(200).json({
-                              ChatSave: true,
-                              chat: await Chat.findById(newChat._id),
-                              userOneUpdate: await User.findById(userOne),
-                              userTwoUpdate: await User.findById(userTwo),
-                              newComment: await Comment.findById(
-                                savedComment._id
-                              ),
-                            });
-                          } catch (error) {
-                            return res.status(404).json("Dont update userTwo");
-                          }
-                        } catch (error) {
-                          return res.status(404).json("Dont update userOne");
-                        }
+                      try {
+                        await User.findByIdAndUpdate(userTwo, {
+                          $push: { chats: newChat._id },
+                        });
+                        return res.status(200).json({
+                          ChatSave: true,
+                          chat: await Chat.findById(newChat._id),
+                          userOneUpdate: await User.findById(userOne),
+                          userTwoUpdate: await User.findById(userTwo),
+                          newComment: await Comment.findById(savedComment._id),
+                        });
+                      } catch (error) {
+                        return res.status(404).json("Couldn't update userTwo");
                       }
                     } catch (error) {
-                      console.log("entro en el error ");
-                      return res.status(404).json(error.message);
-                    }
-                  } else {
-                    console.log("entro abajo");
-                    try {
-                      await Chat.findByIdAndUpdate(
-                        chatExistOne ? chatExistOne._id : chatExistTwo._id,
-                        { $push: { menssages: newComment.id } }
-                      );
-                      return res.status(200).json({
-                        ChatExist: true,
-                        newComment: await Comment.findById(savedComment._id),
-                        chatUpdate: await Chat.findById(
-                          chatExistOne ? chatExistOne._id : chatExistTwo._id
-                        ),
-                      });
-                    } catch (error) {
-                      return res.status(404).json("error update chat");
+                      return res.status(404).json("Couldn't update userOne");
                     }
                   }
                 } catch (error) {
-                  return next(error);
+                  return res.status(404).json(error.message);
                 }
               } else {
                 try {
-                  if (req.body.referenceUser) {
-                    await User.findByIdAndUpdate(req.body.referenceUser, {
-                      $push: { commentsByOthers: newComment._id },
-                    });
-                    try {
-                      const userOne = req.user._id;
-                      const userTwo = req.body.referenceUser;
-                      // const userTwo = req.body.referenceUser
-                      //   ? req.body.referenceUser
-                      //   : userReal.owner[0]._id;
-
-                      const chatExistOne = await Chat.findOne({
-                        userOne,
-                        userTwo,
-                      });
-
-                      const chatExistTwo = await Chat.findOne({
-                        userOne: userTwo,
-                        userTwo: userOne,
-                      });
-
-                      if (!chatExistOne && !chatExistTwo) {
-                        const newChat = new Chat({ userOne, userTwo });
-                        newChat.menssages.push(newComment._id);
-                        try {
-                          await newChat.save();
-                          const findNewChat = await Chat.findById(newChat._id);
-                          if (findNewChat) {
-                            try {
-                              await User.findByIdAndUpdate(userOne, {
-                                $push: { chats: newChat._id },
-                              });
-
-                              try {
-                                await User.findByIdAndUpdate(userTwo, {
-                                  $push: { chats: newChat._id },
-                                });
-                                return res.status(200).json({
-                                  ChatSave: true,
-                                  chat: await Chat.findById(newChat._id),
-                                  userOneUpdate: await User.findById(userOne),
-                                  userTwoUpdate: await User.findById(userTwo),
-                                  newComment: await Comment.findById(
-                                    savedComment._id
-                                  ),
-                                });
-                              } catch (error) {
-                                return res
-                                  .status(404)
-                                  .json("Dont update userTwo");
-                              }
-                            } catch (error) {
-                              return res
-                                .status(404)
-                                .json("Dont update userOne");
-                            }
-                          }
-                        } catch (error) {
-                          return res.status(404).json(error.message);
-                        }
-                      } else {
-                        try {
-                          console.log("entro por push");
-                          await Chat.findByIdAndUpdate(
-                            chatExistOne ? chatExistOne._id : chatExistTwo._id,
-                            { $push: { menssages: newComment.id } }
-                          );
-                          return res.status(200).json({
-                            ChatExist: true,
-                            newComment: await Comment.findById(
-                              savedComment._id
-                            ),
-                            chatUpdate: await Chat.findById(
-                              chatExistOne ? chatExistOne._id : chatExistTwo._id
-                            ),
-                          });
-                        } catch (error) {
-                          return res.status(404).json("error update chat");
-                        }
-                      }
-                    } catch (error) {
-                      return next(error);
-                    }
-                  }
-
-                  //! ---------------------------------------------------------------------------------------
-                  //! -------------------------------------------------------------------------------------
-
-                  //! ---------------------------------------------------------------------------------------
-                  //! -------------------------------------------------------------------------------------
+                  console.log("Esto es un update del chat");
+                  await Chat.findByIdAndUpdate(
+                    //aqui comprobamos que en la clausula del if ha dado que una de las condiciones
+                    //no se cumple, significa que hay un chat que contiene los ids de los usuarios.
+                    //si existe el chatOne entonces le vamos a hacer el update a ese. Si no, la
+                    //unica posibilidad que queda es que sea a la inversa
+                    chatExistOne ? chatExistOne._id : chatExistTwo._id,
+                    { $push: { comments: newComment.id } }
+                  );
+                  return res.status(200).json({
+                    didChatExist: true,
+                    newComment: await Comment.findById(savedComment._id),
+                    chatUpdate: await Chat.findById(
+                      chatExistOne ? chatExistOne._id : chatExistTwo._id
+                    ),
+                  });
                 } catch (error) {
-                  return res
-                    .status(404)
-                    .json("error updating user reviews with him");
+                  return res.status(404).json("Error updating existing chat.");
                 }
               }
             } catch (error) {
-              return res
-                .status(404)
-                .json("error updating referenceOffer model");
+              return next(error);
             }
+
+            //! ---------------------------------------------------------------------------------------
+            //! -------------------------------------------------------------------------------------
+
+            //! ---------------------------------------------------------------------------------------
+            //! -------------------------------------------------------------------------------------
           } catch (error) {
-            return res.status(404).json("error updating owner user comment ");
+            return res
+              .status(404)
+              .json("Error updating receivedComments in the recipient.");
           }
-        } else {
-          return res.status(404).json("Error creating comment");
+        } catch (error) {
+          return res.status(404).json("Error updating our sentComments array ");
         }
-      } catch (error) {
-        return res.status(404).json("error saving comment");
+      } else {
+        return res.status(404).json("Error creating comment");
       }
     } catch (error) {
-      return res.status(500).json(error.message);
+      return res.status(404).json(error.message);
     }
   } catch (error) {
-    return next(error);
+    return (
+      res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      }) && next(error)
+    );
   }
 };
 
+//aqui hacemos un populado de un populado. Cogemos user y populamos chats,
+//y a su vez, populamos lo que hay dentro de chats. Path es como se llama la clave que vamos a popular, y model
+//al modelo que pertenece, como para que sepa donde encontrarlo.
+
+const getUserChats = async (req, res, next) => {
+  const { id } = req.user;
+  const userChats = await User.findById(id).populate({
+    path: "chats",
+    populate: [
+      { path: "userOne", model: User },
+      { path: "userTwo", model: User },
+      { path: "comments", model: Comment },
+    ],
+  });
+  return res.status(200).json(userChats);
+};
+
 module.exports = {
-  createChat,
   newComment,
+  getUserChats
 };

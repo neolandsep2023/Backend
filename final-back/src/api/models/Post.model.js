@@ -15,14 +15,22 @@ const PostSchema = new Schema(
       otherImage: [{type:String}],
       location: { type: String, enum: citiesEnum, required: true },
       type: { type: String, enum: ['RoomSeeker', 'RoommateSeeker'], required: true },
+      preferredGender: {type: String, required: true, enum: ["female", "male", "irrelevant"]},
+      preferredAge: {type: String, required: true, enum: [
+        "18-25",
+        "26-35",
+        "36-45",
+        "+45",
+        "irrelevant"
+      ]},
+      price: {type: Number, required: true},
+      deposit: {type: Boolean, required: true},
+      depositPrice: {type: Number},
       author: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
       room: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Room' }],
       roomates: [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],
-      // authorImage: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-      // authorName: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-
       likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-      interested: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+      saved: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
       comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
     },
     {

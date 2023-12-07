@@ -1,0 +1,17 @@
+const habits = [
+  "Night worker",
+  "Student",
+  "Early riser",
+  "Freelancer",
+  "Athlete",
+  "Artist",
+  "Entrepreneur",
+  "Traveler",
+  "Bookworm",
+  "Gamer",
+  "Parent",
+  "Yogi",
+  "Tech enthusiast",
+  "Chef",
+  "Socialite",
+];

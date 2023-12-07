@@ -2,8 +2,8 @@ const mongoose = require("mongoose")
 const Schema = mongoose.Schema;
 const RoomSchema = new Schema(
   {
-    title: {type: String, required: true, trim: true},
-    description: {type: String, required: true},
+    title: {type: String, required: true, trim: true, maxLength: 100},
+    description: {type: String, required: true, minLength: 50, maxLength: 300},
     type: {type: String, required: true, enum: [
       "Apartment",
       "House",
@@ -15,6 +15,14 @@ const RoomSchema = new Schema(
       "Flat",
     ]},
     available: {type: Date, required: true},
+    preferredGender: {type: String, required: true, enum: ["female", "male", "irrelevant"]},
+    preferredAge: {type: String, required: true, enum: [
+      "18-25",
+      "26-35",
+      "36-45",
+      "+45",
+      "irrelevant"
+    ]},
     surface: {type: Number, required: true},
     bathroom: {type: Boolean, required: true},
     publicLocation: {type: String, required: true},
@@ -63,6 +71,7 @@ const RoomSchema = new Schema(
     price: {type: Number, required: true},
     postedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],
+    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment"}],
     image: [{type: String}]
   },
   {

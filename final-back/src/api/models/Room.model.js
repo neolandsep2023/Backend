@@ -15,6 +15,7 @@ const RoomSchema = new Schema(
       "Flat",
     ]},
     available: {type: Date, required: true},
+<<<<<<< HEAD
     preferredGender: {type: String, required: true, enum: ["female", "male", "irrelevant"]},
     preferredAge: {type: String, required: true, enum: [
       "18-25",
@@ -23,14 +24,24 @@ const RoomSchema = new Schema(
       "+45",
       "irrelevant"
     ]},
+=======
+    // preferredGender: {type: String, required: true, enum: ["female", "male", "irrelevant"]},
+    // preferredAge: {type: String, required: true, enum: [
+    //   "18-25",
+    //   "26-35",
+    //   "36-45",
+    //   "+45",
+    //   "irrelevant"
+    // ]},
+>>>>>>> 14d3e080d1dabeb8644191b06909159945937e8a
     surface: {type: Number, required: true},
     bathroom: {type: Boolean, required: true},
     publicLocation: {type: String, required: true},
     postcode: {type: Number, required: true},
     petsAllowed: {type: Boolean, required: true},
     exterior: {type: Boolean, required: true},
-    deposit: {type: Boolean, required: true},
-    depositPrice: {type: Number},
+    // deposit: {type: Boolean, required: true},
+    // depositPrice: {type: Number},
     roomates: {type: Number, required: true},
     commoditiesRoom: {type: String, required: true, enum: [
       "Furnished",
@@ -68,9 +79,13 @@ const RoomSchema = new Schema(
       "Fitness Center",
       "Pool",      
     ]},
-    price: {type: Number, required: true},
+    // price: {type: Number, required: true},
     postedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],
+<<<<<<< HEAD
+=======
+    saved: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+>>>>>>> 14d3e080d1dabeb8644191b06909159945937e8a
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment"}],
     image: [{type: String}]
   },

@@ -1,5 +1,6 @@
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 const Room = require("../models/Room.model");
+const User = require("../models/User.model");
 
 //! ------------------ CREATE ------------------
 const createRoom = async (req, res, next) => {
@@ -20,16 +21,21 @@ const createRoom = async (req, res, next) => {
     const saveRoom = await newRoom.save();
     return saveRoom ? res.status(200).json(saveRoom) : res.status({ message: "Error in room creation", error})
   } catch (error) {
-    req.file?.path && deleteImgCloudinary(catchImg)
-    return res.status(500).json({
-      error: 'Error en el catch',
-      message: error.message,
-    })
+      if (catchImg) {
+        for (let a = 0 ; a < catchImg.length ; a++) {
+          deleteImgCloudinary(catchImg[a])
+        }
+      return res.status(500).json({
+        error: 'Error en el catch',
+        message: error.message,
+      })
+    }
   }
 }
 
 //! ------------------ UPDATE ------------------
 const updateRoom = async (req, res, next) => {
+  console.log("holaaa")
   await Room.syncIndexes();
   let catchImg = req.files
   console.log(catchImg)
@@ -38,27 +44,36 @@ const updateRoom = async (req, res, next) => {
     const roomById = await Room.findById(id);
     if (roomById) {
       const oldImg = roomById.image;
+      const images = []
+      catchImg.map((image) => { //? como catchImg (req.files) es un array de objetos, tengo que recorrerlo y de cada objeto quedarme con el path para ser eso lo que meto en la room
+        images.push(image.path)
+      })
 
       const customBody = {
         _id: roomById._id,
-        image: req.file?.path ? catchImg : oldImg,
-        title: req.file?.title ? req.file.title : roomById.title,
-        description: req.file?.description ? req.file.description : roomById.description,
-        surface: req.file?.surface ? req.file.surface : roomById.surface,
-        bathroom: req.file?.bathroom ? req.file.bathroom : roomById.bathroom,
-        publicLocation: req.file?.publicLocation ? req.file.publicLocation : roomById.publicLocation,
-        petsAllowed: req.file?.petsAllowed ? req.file.petsAllowed : roomById.petsAllowed,
-        exterior: req.file?.exterior ? req.file.exterior : roomById.exterior,
-        deposit: req.file?.deposit ? req.file.deposit : roomById.deposit,
-        depositPrice: req.file?.depositPrice ? req.file.depositPrice : roomById.depositPrice,
-        roomates: req.file?.roomates ? req.file.roomates : roomById.roomates,
-        price: req.file?.price ? req.file.price : roomById.price,
+        image: catchImg ? images : oldImg,
+        title: req.body?.title ? req.body.title : roomById.title,
+        description: req.body?.description ? req.body.description : roomById.description,
+        surface: req.body?.surface ? req.body.surface : roomById.surface,
+        bathroom: req.body?.bathroom ? req.body.bathroom : roomById.bathroom,
+        publicLocation: req.body?.publicLocation ? req.body.publicLocation : roomById.publicLocation,
+        petsAllowed: req.body?.petsAllowed ? req.body.petsAllowed : roomById.petsAllowed,
+        exterior: req.body?.exterior ? req.body.exterior : roomById.exterior,
+        deposit: req.body?.deposit ? req.body.deposit : roomById.deposit,
+        depositPrice: req.body?.depositPrice ? req.body.depositPrice : roomById.depositPrice,
+        roomates: req.body?.roomates ? req.body.roomates : roomById.roomates,
+        price: req.body?.price ? req.body.price : roomById.price,
       }
 
       try {
         await Room.findByIdAndUpdate(id, customBody)
         if (catchImg) {
-          deleteImgCloudinary(oldImg); 
+          // console.log(catchImg) //? consoles para entender qué es cada cosa
+          // console.log(oldImg)
+          // console.log(images)
+          for (let a = 0 ; a < oldImg.length ; a++) {
+            deleteImgCloudinary(oldImg[a])
+          }
         }
         //!           -------------------
         //!           | RUNTIME TESTING |
@@ -222,11 +237,11 @@ const sortRooms = async (req, res, next) => {
       case "depositPrice":
       case "roomates":
       case "price":
-        if (method == descending) {
+        if (method == "descending") {
           roomsArray.sort((a, b) => {
             return b[value] - a[value];
           })
-        } else if (method == ascending) {
+        } else if (method == "ascending") {
           roomsArray.sort((a, b) => {
             return a[value] - b[value];
           })
@@ -234,11 +249,11 @@ const sortRooms = async (req, res, next) => {
         break;
   
       case "likes":
-        if (method == descending) {
+        if (method == "descending") {
           roomsArray.sort((a, b) => {
             return b[value] - a[value];
           })
-        } else if (method == ascending) {
+        } else if (method == "ascending") {
           roomsArray.sort((a, b) => {
             return a[value] - b[value];
           })
@@ -249,7 +264,7 @@ const sortRooms = async (req, res, next) => {
     }
     return roomsArray.length > 0 ? res.status(200).json(roomsArray) : res.status(404).json("there are no rooms in the db")
   } catch (error) {
-    return res.staus(500).json({
+    return res.status(500).json({
       error: "Error en el catch",
       message: error.message
     })
@@ -268,7 +283,7 @@ const filterRooms = async (req, res, next) => {
       case "roomates":
       case "price":
         roomsArray = await Room.find({
-          $and : [{ [filter]: {$gt: min}}, { [filter]: {lt: max}}] //? $and concatena; filter el value que filtrar; gt es min, lt es max
+          $and : [{ [filter]: {$gt: min}}, { [filter]: {$lt: max}}] //? $and concatena; filter el value que filtrar; gt es min, lt es max
         }).populate("postedBy")
         break;
     

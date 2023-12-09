@@ -5,6 +5,7 @@ const commoditiesHomeEnum = require("../data/commoditiesHomeEnum")
 const housingTypeEnum = require("../data/housingTypeEnum")
 
 const enumCheck = (type, value) => {
+  let acc
   //type es por donde va a entrar, y value el valor que queramos comprobar si esta en el array
   switch (type) {
     case "gender":
@@ -13,7 +14,7 @@ const enumCheck = (type, value) => {
       } else return { check: false };
 
     case "interests":
-      let acc = 0;
+      acc = 0;
       if (value.length > 0) {
         value.forEach((element) => {
           if (interestsEnum.includes(element)) {
@@ -24,13 +25,29 @@ const enumCheck = (type, value) => {
       }
 
     case "housingType":
-      return housingTypeEnum.includes(value) ? true : false;
+      return housingTypeEnum.includes(value) ? {check: true, value} : {cehck: false};
 
     case "commoditiesRoom":
-      return commoditiesRoomEnum.includes(value) ? true : false;
+      acc = 0;
+      if (value.length > 0) {
+        value.forEach((element) => {
+          if (commoditiesRoomEnum.includes(element)) {
+            acc++;
+          }
+        });
+        return acc == value.length ? { check: true } : { check: false };
+      }
 
     case "commoditiesHome":
-      return commoditiesHomeEnum.includes(value) ? true : false;
+      acc = 0;
+      if (value.length > 0) {
+        value.forEach((element) => {
+          if (commoditiesHomeEnum.includes(element)) {
+            acc++;
+          }
+        });
+        return acc == value.length ? { check: true } : { check: false };
+      }
 
     default:
       break;

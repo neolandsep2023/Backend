@@ -7,7 +7,8 @@ const {
   getByName,
   getAll,
   sortRooms,
-  filterRooms
+  filterRooms,
+  filterEnumRooms
 } = require("../controllers/Room.controller");
 
 
@@ -21,5 +22,6 @@ RoomRoutes.get("/", getAll)
 RoomRoutes.get("/byName/:name", getByName)
 RoomRoutes.get("/sort/rooms/:method/:value", sortRooms)
 RoomRoutes.get("/filter/rooms/:filter/:min/:max", filterRooms)
+RoomRoutes.get("/filter/rooms/:filter/:value", filterEnumRooms)
 
 module.exports = RoomRoutes

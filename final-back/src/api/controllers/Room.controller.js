@@ -55,15 +55,40 @@ const updateRoom = async (req, res, next) => {
         image: catchImg ? images : oldImg,
         title: req.body?.title ? req.body.title : roomById.title,
         description: req.body?.description ? req.body.description : roomById.description,
+        available: req.body?.available ? req.body.available : roomById.available,
         surface: req.body?.surface ? req.body.surface : roomById.surface,
         bathroom: req.body?.bathroom ? req.body.bathroom : roomById.bathroom,
         publicLocation: req.body?.publicLocation ? req.body.publicLocation : roomById.publicLocation,
+        publicLocation: req.body?.postcode ? req.body.postcode : roomById.postcode,
         petsAllowed: req.body?.petsAllowed ? req.body.petsAllowed : roomById.petsAllowed,
         exterior: req.body?.exterior ? req.body.exterior : roomById.exterior,
-        deposit: req.body?.deposit ? req.body.deposit : roomById.deposit,
-        depositPrice: req.body?.depositPrice ? req.body.depositPrice : roomById.depositPrice,
+        // deposit: req.body?.deposit ? req.body.deposit : roomById.deposit,
+        // depositPrice: req.body?.depositPrice ? req.body.depositPrice : roomById.depositPrice,
         roomates: req.body?.roomates ? req.body.roomates : roomById.roomates,
-        price: req.body?.price ? req.body.price : roomById.price,
+        // price: req.body?.price ? req.body.price : roomById.price,
+      }
+      //todo ------------ ENUM (type) ------------
+      if (req.body?.type) {
+        const resultEnum = enumCheck(type, req.body?.type); //? checkea si el valor introducido coincide con el enum (enumOk en utils) y devuelve check: true/false
+        resultEnum.check
+          ? req.body?.type //? ----------------------------- si check es true, coge el valor ya que es válido
+          : playerById.type; //? ---------------------------- si check es false, se queda con lo que tenía ya que el valor introducido no es el correcto del enum
+      }
+
+      //todo ------------ ENUM (commoditiesHouse) ------------
+      if (req.body?.commoditiesHouse) {
+        const resultEnum = enumCheck(commoditiesHouse, req.body?.commoditiesHouse); //? checkea si el valor introducido coincide con el enum (enumOk en utils) y devuelve check: true/false
+        resultEnum.check
+          ? req.body?.commoditiesHouse //? ----------------------------- si check es true, coge el valor ya que es válido
+          : playerById.commoditiesHouse; //? ---------------------------- si check es false, se queda con lo que tenía ya que el valor introducido no es el correcto del enum
+      }
+
+      //todo ------------ ENUM (commoditiesRoom) ------------
+      if (req.body?.commoditiesRoom) {
+        const resultEnum = enumCheck(commoditiesRoom, req.body?.commoditiesRoom); //? checkea si el valor introducido coincide con el enum (enumOk en utils) y devuelve check: true/false
+        resultEnum.check
+          ? req.body?.commoditiesRoom //? ----------------------------- si check es true, coge el valor ya que es válido
+          : playerById.commoditiesRoom; //? ---------------------------- si check es false, se queda con lo que tenía ya que el valor introducido no es el correcto del enum
       }
 
       try {
@@ -319,18 +344,17 @@ const filterEnumRooms = async (req, res, next) => {
   try {
     const { filter, value } = req.params;
     const roomFinds = await Room.find({ [filter]: value}).populate("postedBy")
+    const resultEnum = enumCheck(filter, value)
     switch (filter) {
-      case "type":
-        if (enumCheck("type", value)) {
-
-        } else {
-          return res.status(404).json("We couldn't find matching housing types in the db")
-        }
-        break;
-    
-      default:
-        break;
+      case "commoditiesRoom":
+      case "commoditiesHome":
+      case "housingType":
+      if (!resultEnum.check) {
+        return res.status(404).json("We couldn't find matching filter values in the db")
+      }
+      break
     }
+    return roomFinds.length > 0 ? res.status(200).json(roomFinds) : res.status(404).json("We couldn't find any element with the given filters")
   } catch (error) {
     return res.status(500).json({
       error: "Error en el catch",
@@ -348,5 +372,5 @@ module.exports = {
   getAll,
   sortRooms,
   filterRooms,
-
+  filterEnumRooms
 }

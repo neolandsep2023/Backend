@@ -21,32 +21,32 @@ const UserSchema = new mongoose.Schema(
     },
     lastName: {
       type: String,
-      required: true,
+      // required: true,
       trim: true,
     },
     username: {
       type: String,
-      required: true,
+      // required: true,
       trim: true,
       unique: true,
     },
     birthYear: {
       type: Number,
-      required: true,
+      // required: true,
       trim: true,
       min: 1900,
       max: 2005,
     },
     password: {
       type: String,
-      required: true,
+      // required: true,
       trim: true,
       validate: [validator.isStrongPassword], //minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1
     },
     gender: {
       type: String,
       enum: genderEnum,
-      required: true,
+      // required: true,
     },
     role: {
       type: String,

@@ -21,17 +21,15 @@ const {
   saveRoom,
   toggleLikedComment,
   getUserByIdPopulated,
+  registerGoogle
 } = require("../controllers/User.controller");
 
 //!--------ROUTES----------------------------------------------
 
 const UserRoutes = require("express").Router();
 
-UserRoutes.post(
-  "/register/registerRedirect",
-  upload.single("image"),
-  redirectRegister
-);
+UserRoutes.post("/register/registerGoogle", registerGoogle);
+UserRoutes.post("/login", userLogin);
 UserRoutes.post("/login", userLogin);
 UserRoutes.post("/login/autologin", autoLogin);
 UserRoutes.post("/resend/code", resendCode);

@@ -1,17 +1,11 @@
 const habits = [
-  "Night worker",
   "Student",
+  "Night worker",
   "Early riser",
-  "Freelancer",
+  "Remote worker",
   "Athlete",
   "Artist",
-  "Entrepreneur",
-  "Traveler",
-  "Bookworm",
   "Gamer",
-  "Parent",
-  "Yogi",
-  "Tech enthusiast",
-  "Chef",
-  "Socialite",
+  "Influencer",
+  "Freelancer"
 ];

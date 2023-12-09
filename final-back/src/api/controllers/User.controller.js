@@ -76,6 +76,65 @@ const redirectRegister = async (req, res, next) => {
   }
 };
 
+
+
+//<!--SEC                                   REGISTER GOOGLE                                                  ->
+
+const registerGoogle = async (req, res, next) => {
+
+
+const customBody = {
+  email: req.body.email,
+  name: req.body.name,
+  lastName: req?.body?.lastName ? req?.body?.lastName : null,
+  confirmationCode: randomCode(),
+  isVerified: req.body.isVerified,
+  image: req.body.image
+}
+
+
+  try {
+    await User.syncIndexes();
+    const doesUserExist = await User.findOne(
+      { email: req.body.email }
+    );
+    if (!doesUserExist) {
+      const newUser = new User(customBody);
+      try {
+        console.log('HOLAAAAAAAAAAAAAAA', newUser)
+        const savedUser = await newUser.save();
+        console.log('HOLAAAAAAAAAAAAAAA', newUser)
+        console.log('lo guardooooo', savedUser)
+        if (savedUser) {
+          console.log('entro')
+          return res.status(200).json(savedUser)
+        }
+      } catch (error) {
+        return res.status(404).json(error.message);
+      }
+    } else {
+      if (req.file) deleteImgCloudinary(catchImage);
+      return res.status(409).json("This user already exists.");
+    }
+  } catch (error) {
+    req.file && deleteImgCloudinary(catchImage);
+    return (
+      res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      }) && next(error)
+    );
+  }
+};
+
+
+
+
+
+
+
+
+
 //<-- SEC              SENDCODE DEL REDIRECT DE SENDMAIL!!!                    -->
 const sendCode = async (req, res, next) => {
   try {
@@ -947,4 +1006,5 @@ module.exports = {
   toggleLikedComment,
   toggleLikedPost,
   saveRoom,
+  registerGoogle
 };

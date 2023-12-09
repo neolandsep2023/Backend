@@ -1,126 +1,94 @@
-
 const Comment = require("../models/Comment.model");
 const Room = require("../models/Room.model");
 const { ObjectId } = require("mongodb");
 const Post = require("../models/Post.model");
 const User = require("../models/User.model");
 
-
 //! ---------------------------------------------------------------------
 //? ------------------------ CREATE USER REVIEW -------------------------
 //! ---------------------------------------------------------------------
 const createPostComment = async (req, res, next) => {
+  try {
+    const { idPost } = req.params; //id del POST
+    const post = await Post.findById(idPost);
+    const { _id } = req.user;
 
     try {
-        const { idPost }= req.params   //id del POST
-        const post = await Post.findById(idPost)
-        const { _id } = req.user
+      await Comment.syncIndexes();
 
+      const commentBody = {
+        textComment: req.body.textComment,
+        type: "public",
+        creator: _id,
+      };
+
+      const newComment = new Comment(commentBody);
+      const savedComment = await newComment.save();
+
+      if (savedComment) {
         try {
-            
-            await Comment.syncIndexes()
-    
-            const commentBody = {
-              textComment: req.body.textComment,
-              type: "public",
-              creator: _id
-            };
-            
-            const newComment = new Comment(commentBody)
-            const savedComment = await newComment.save()
+          await Post.findByIdAndUpdate(idPost, {
+            $push: { comments: savedComment },
+          });
 
-            if(savedComment){
+          try {
+            await User.findByIdAndUpdate(_id, {
+              $push: { sentComments: savedComment },
+            });
 
-                    try {
-                        await Post.findByIdAndUpdate(idPost, {
-                            $push: { comments: savedComment}
-                        })
+            try {
+              await Comment.findByIdAndUpdate(savedComment._id, {
+                $push: { commentedPost: post },
+              });
 
-                        try {
-
-                            await User.findByIdAndUpdate(_id, {
-                                $push: { sentComments: savedComment}
-                            })
-
-                            try {
-                                
-                                await Comment.findByIdAndUpdate(savedComment._id, {
-                                    $push: { commentedPost: post }
-                                })
-
-
-                                  try {
-                                    
-
-                                    return res.status(200).json({
-                                        commentCreated: await Comment.findById(savedComment._id).populate('creator commentedPost')
-                                    })
-
-                                  } catch (error) {
-                                    return res.status(404).json({
-                                        error: "Error giving response",
-                                        message: error.message,
-                                      });
-                                  }
-                                    
-                        
-                            } catch (error) {
-                                return res.status(404).json({
-                                    error: "Post and User not saved into Comment",
-                                    message: error.message,
-                                  });
-                            }
-
-
-
-
-                            
-                        } catch (error) {
-                            return res.status(404).json({
-                                error: "Comment not saved into User",
-                                message: error.message,
-                              });
-                        }
-
-                        
-                    } catch (error) {
-                        return res.status(404).json({
-                            error: "Comment not saved into Post",
-                            message: error.message,
-                          });
-                    }
-                
-            }
-
-
-
-
-        } catch (error) {
-            return res.status(404).json({
-                error: "Error en el catch",
+              try {
+                return res.status(200).json({
+                  commentCreated: await Comment.findById(
+                    savedComment._id
+                  ).populate("creator commentedPost"),
+                });
+              } catch (error) {
+                return res.status(404).json({
+                  error: "Error giving response",
+                  message: error.message,
+                });
+              }
+            } catch (error) {
+              return res.status(404).json({
+                error: "Post and User not saved into Comment",
                 message: error.message,
               });
-        }
-      
-    
-
-
-    } catch (error) {
-        return res.status(500).json({
-            error: "Error en el catch",
+            }
+          } catch (error) {
+            return res.status(404).json({
+              error: "Comment not saved into User",
+              message: error.message,
+            });
+          }
+        } catch (error) {
+          return res.status(404).json({
+            error: "Comment not saved into Post",
             message: error.message,
           });
+        }
+      }
+    } catch (error) {
+      return res.status(404).json({
+        error: "Error en el catch",
+        message: error.message,
+      });
     }
-  
-
-
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error en el catch",
+      message: error.message,
+    });
+  }
 };
-
 
 //! ---------------------------------------------------------------------
 //? ------------------------ CREATE ROOM REVIEW -------------------------
 //! ---------------------------------------------------------------------
-
 
 const createRoomReview = async (req, res, next) => {
   try {
@@ -144,13 +112,14 @@ const createRoomReview = async (req, res, next) => {
               $push: { comments: newComment._id },
             });
             try {
-              const createdComment =  await Comment.findById(savedComment._id).populate('creator commentedRoom');
+              const createdComment = await Comment.findById(
+                savedComment._id
+              ).populate("creator commentedRoom");
               return res.status(200).json({
-                  commentCreated: createdComment
-              })
+                commentCreated: createdComment,
+              });
             } catch (error) {
-            return res.status(404).json(error.message);
-              
+              return res.status(404).json(error.message);
             }
           } catch (error) {
             return res.status(404).json("error updating room model");
@@ -169,8 +138,6 @@ const createRoomReview = async (req, res, next) => {
     return res.status(500).json(error.message);
   }
 };
-
-
 
 //! ---------------------------------------------------------------------
 //? ------------------------ CREATE USER REVIEW -------------------------
@@ -198,13 +165,14 @@ const createUserReview = async (req, res, next) => {
               $push: { receivedComments: newComment._id },
             });
             try {
-              const createdComment =  await Comment.findById(savedComment._id).populate('creator commentedUser')
+              const createdComment = await Comment.findById(
+                savedComment._id
+              ).populate("creator commentedUser");
               return res.status(200).json({
-                  commentCreated: createdComment
-              })
+                commentCreated: createdComment,
+              });
             } catch (error) {
-            return res.status(404).json("Error saving comment");
-              
+              return res.status(404).json("Error saving comment");
             }
           } catch (error) {
             return res.status(404).json("error updating other user model");
@@ -224,18 +192,13 @@ const createUserReview = async (req, res, next) => {
   }
 };
 
-
-
-
-
-
 //! ---------------------------------------------------------------------
 //? ------------------------------GET ALL -------------------------------
 //! ---------------------------------------------------------------------
 
 const getAll = async (req, res, next) => {
   try {
-    const allComments = await Comment.find({ type: 'public' });
+    const allComments = await Comment.find({ type: "public" });
     if (allComments) {
       return res.status(200).json(allComments);
     } else {
@@ -251,70 +214,53 @@ const getAll = async (req, res, next) => {
 //! ---------------------------------------------------------------------------------------
 
 const deleteComment = async (req, res, next) => {
-    console.log('entro')
-    try {
-      const { id } = req.params;    //ID DEL COMMENT
-      const comment = await Comment.findByIdAndDelete(id); 
-  
+  console.log("entro");
+  try {
+    const { id } = req.params; //ID DEL COMMENT
+    const comment = await Comment.findByIdAndDelete(id);
 
+    if (comment) {
+      try {
+        await User.updateMany(
+          { sentComments: id, receivedComments: id, likedComments: id },
+          {
+            $pull: {
+              sentComments: id,
+              receivedComments: id,
+              likedComments: id,
+            },
+          }
+        );
 
-      if (comment) {
-        
         try {
-      
-          await User.updateMany(
-            { sentComments: id, receivedComments: id, likedComments: id }, 
-            { $pull: { sentComments: id, receivedComments: id, likedComments: id } }
-          );
-  
+          await Post.updateMany({ comments: id }, { $pull: { comments: id } });
+
           try {
-         
-            await Post.updateMany(
-              { comments: id }, 
-              { $pull: { comments: id } } 
+            await Room.updateMany(
+              { comments: id },
+              { $pull: { comments: id } }
             );
 
-            try {
-                
-                await Room.updateMany(
-          
-                    { comments: id }, 
-                    { $pull: { comments: id } } 
-                  );
-
-                  const findByIdComment = await Comment.findById(id); 
-                  return res.status(findByIdComment ? 404 : 200).json({
-               
-                    deleteTest: findByIdComment ? false : true, 
-                  });
-
-
-            } catch (error) {
-                return res.status(500)
-                .json ("Error reading comments");
-            }
-           
+            const findByIdComment = await Comment.findById(id);
+            return res.status(findByIdComment ? 404 : 200).json({
+              deleteTest: findByIdComment ? false : true,
+            });
           } catch (error) {
-              return res.status(500)
-              .json ("Error reading comments");
+            return res.status(500).json("Error reading comments");
           }
         } catch (error) {
-      
-              return res.status(500)
-              .json ("Error reading comments");
-          ;
+          return res.status(500).json("Error reading comments");
         }
-  
-
-      } else {
-        return res.status(404).json('this comment does not exist'); 
+      } catch (error) {
+        return res.status(500).json("Error reading comments");
       }
-    } catch (error) {
-      return res.status(500)
-        .json ("Error reading comments");
-     
+    } else {
+      return res.status(404).json("this comment does not exist");
     }
-  };
+  } catch (error) {
+    return res.status(500).json("Error reading comments");
+  }
+};
 
 //! ---------------------------------------------------------------------
 //? ------------------------------LIKE--------------------------------
@@ -372,7 +318,7 @@ const toggleFavorite = async (req, res, next) => {
 };
 
 //! -----------------------------------------------------------------------
-//? -------------------------------GET_BY_REFERENCE ---------------------------------
+//? -------------------------GET_BY_REFERENCE -----------------------------
 //! -----------------------------------------------------------------------
 
 // const getByReference = async (req, res, next) => {
@@ -400,10 +346,6 @@ const toggleFavorite = async (req, res, next) => {
 //   }
 // };
 
-
-
-
-
 module.exports = {
   createPostComment,
   createRoomReview,
@@ -412,4 +354,3 @@ module.exports = {
   deleteComment,
   toggleFavorite,
 };
-

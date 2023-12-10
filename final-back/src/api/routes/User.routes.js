@@ -29,6 +29,7 @@ const {
 const UserRoutes = require("express").Router();
 
 UserRoutes.post("/register/registerGoogle", registerGoogle);
+UserRoutes.post("/register", redirectRegister)
 UserRoutes.post("/login", userLogin);
 UserRoutes.post("/login", userLogin);
 UserRoutes.post("/login/autologin", autoLogin);

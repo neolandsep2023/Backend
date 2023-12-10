@@ -81,55 +81,63 @@ const redirectRegister = async (req, res, next) => {
 //<!--SEC                                   REGISTER GOOGLE                                                  ->
 
 const registerGoogle = async (req, res, next) => {
-
-
-const customBody = {
-  email: req.body.email,
-  name: req.body.name,
-  lastName: req?.body?.lastName ? req?.body?.lastName : null,
-  confirmationCode: randomCode(),
-  isVerified: req.body.isVerified,
-  image: req.body.image
-}
-
+  console.log(req);
+  const customBody = {
+    email: req.body.email,
+    name: req.body.name,
+    lastName: req?.body?.lastName ? req?.body?.lastName : null,
+    confirmationCode: randomCode(),
+    isVerified: true,
+    image: req.body.image,
+    password: req.body.password,
+    username: req.body.username,
+  };
 
   try {
     await User.syncIndexes();
-    const doesUserExist = await User.findOne(
-      { email: req.body.email }
-    );
+    const doesUserExist = await User.findOne({ email: req.body.email });
+
     if (!doesUserExist) {
       const newUser = new User(customBody);
+
       try {
-        console.log('HOLAAAAAAAAAAAAAAA', newUser)
+        console.log('HOLAAAAAAAAAAAAAAA', newUser);
         const savedUser = await newUser.save();
-        console.log('HOLAAAAAAAAAAAAAAA', newUser)
-        console.log('lo guardooooo', savedUser)
+        console.log('lo guardooooo', savedUser);
+
         if (savedUser) {
-          console.log('entro')
-          return res.status(200).json(savedUser)
+          console.log('entro');
+          return res.status(200).json(savedUser);
         }
       } catch (error) {
-        return res.status(404).json(error.message);
+        console.error('Error during save:', error);
+        return res.status(500).json(error.message);
       }
     } else {
       if (req.file) deleteImgCloudinary(catchImage);
-      return res.status(409).json("This user already exists.");
+      return res.status(409).json('This user already exists.');
     }
   } catch (error) {
     req.file && deleteImgCloudinary(catchImage);
-    return (
-      res.status(500).json({
-        error: "Error en el catch",
-        message: error.message,
-      }) && next(error)
-    );
+    console.error('Error in try-catch block:', error);
+
+    return res.status(500).json({
+      error: 'Error in the catch block',
+      message: error.message,
+    }) && next(error);
   }
 };
 
+//el problema esta en que el modelo de usuario hace un pre.save de la contrasena, por lo que no puede guardar
+//el usuario que viene desde google(no tiene contrasena). Lo mejor que se me puede ocurrir es gestionar la respuesta y
+//quiza hacer un controlador que te redirija a otro controlador segun que login hayas usado y que complete el
+//usuario de forma dependiente del metodo. Se puede hacer tambien en el mismo controlador, pero no se gestionar
+//la respuesta y condicionalmente hacerlo. if req.loginMethod == normal, y en el form meterle que el login method sea normal?
+//y luego en el modelo de usuario meter una clave que sea loginMethod y diga google o normal, para que en el login
+//te diga si tienes que hacer login con google o normal
 
 
-
+module.exports = registerGoogle;
 
 
 

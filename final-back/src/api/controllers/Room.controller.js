@@ -10,6 +10,7 @@ const createRoom = async (req, res, next) => {
   try {
     await Room.syncIndexes();
     const newRoom = new Room(req.body);
+    newRoom.postedBy = req.user.id
     if (catchImg.length > 0) {
       let a = 0
       catchImg.map((img) => {

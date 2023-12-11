@@ -89,10 +89,11 @@ const registerGoogle = async (req, res, next) => {
     confirmationCode: randomCode(),
     isVerified: true,
     image: req.body.image,
-    password: req.body.password,
+    password: randomPassword(),
     username: req.body.username,
+    googleSignUp: true,
   };
-
+console.log(customBody.password)
   try {
     await User.syncIndexes();
     const doesUserExist = await User.findOne({ email: req.body.email });

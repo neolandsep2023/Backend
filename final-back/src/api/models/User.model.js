@@ -69,6 +69,7 @@ const UserSchema = new mongoose.Schema(
         type: String,
         trim: true,
     },
+    googleSignUp: { type: Boolean, required: true, default: false},
     interests: [{
         type: String,
         enum: interestsEnum,

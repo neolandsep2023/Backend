@@ -14,7 +14,7 @@ const RoomSchema = new Schema(
       "Duplex",
       "Flat",
     ]},
-    available: {type: boolean, required: true, default: true},
+    available: {type: Boolean, required: true, default: true},
     // preferredGender: {type: String, required: true, enum: ["female", "male", "irrelevant"]},
     // preferredAge: {type: String, required: true, enum: [
     //   "18-25",
@@ -27,13 +27,14 @@ const RoomSchema = new Schema(
     surface: {type: Number, required: true},
     bathroom: {type: Boolean, required: true},
     publicLocation: {type: String, required: true},
+    province: {type: String, required: true},
     postcode: {type: Number, required: true},
     petsAllowed: {type: Boolean, required: true},
     exterior: {type: Boolean, required: true},
     // deposit: {type: Boolean, required: true},
     // depositPrice: {type: Number},
-    roomates: {type: Number, required: true},
-    commoditiesRoom: {type: String, required: true, enum: [
+    roommates: {type: Number, required: true},
+    commoditiesRoom: [{type: String, required: true, enum: [
       "Furnished",
       "Single Bed",
       "Double Bed",
@@ -41,8 +42,8 @@ const RoomSchema = new Schema(
       "Balcony",
       "Natural Light",
       "Working Space",  
-    ]},
-    commoditiesHome: {type: String, required: true, enum: [
+    ]}],
+    commoditiesHome: [{type: String, required: true, enum: [
       "Appliances Included",
       "Living Room",
       "Dining Room",
@@ -68,7 +69,7 @@ const RoomSchema = new Schema(
       "Smoking Allowed",
       "Fitness Center",
       "Pool",      
-    ]},
+    ]}],
     // price: {type: Number, required: true},
     postedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User"}],

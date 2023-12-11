@@ -14,7 +14,7 @@ const RoomSchema = new Schema(
       "Duplex",
       "Flat",
     ]},
-    available: {type: Date, required: true},
+    available: {type: boolean, required: true, default: true},
     // preferredGender: {type: String, required: true, enum: ["female", "male", "irrelevant"]},
     // preferredAge: {type: String, required: true, enum: [
     //   "18-25",

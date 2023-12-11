@@ -96,7 +96,11 @@ const registerGoogle = async (req, res, next) => {
 console.log(customBody.password)
   try {
     await User.syncIndexes();
-    const doesUserExist = await User.findOne({ email: req.body.email });
+      
+      const doesUserExist = await User.findOne(
+        { username: req.body.username },
+        { email: req.body.email }
+      );
 
     if (!doesUserExist) {
       const newUser = new User(customBody);
@@ -296,8 +300,11 @@ const userLogin = async (req, res, next) => {
   try {
     const { password, email } = req.body;
     const userFromDB = await User.findOne({ email });
-
+    
     if (userFromDB) {
+      if (userFromDB.googleSignUp == true) {
+        return res.status(404).json('Sign in with Google.')
+      }
       if (bcrypt.compareSync(password, userFromDB.password)) {
         const token = generateToken(userFromDB._id, email); //token
         return res.status(200).json({
@@ -359,6 +366,8 @@ const passChangeWhileLoggedOut = async (req, res, next) => {
     console.log(req.body);
     const userFromDB = await User.findOne({ email });
     if (userFromDB) {
+      if (userFromDB.googleSignUp == true) {
+        return res.status(404).json('Sign in with Google.')}
       console.log("userFromDB antes del redirect:", userFromDB._id);
       return res.redirect(
         307,
@@ -449,7 +458,8 @@ const sendPassword = async (req, res, next) => {
 
 //<!--SEC                                           PASSWORD CHANGE                                              ->
 //WORKS CORRECTLY
-
+//fix password change que no funcione para loos usuarios de google
+//if (userFromDB.googleSignUp == true) {return res.status(404).json('Sign in with Google.')}
 const passwordChange = async (req, res, next) => {
   try {
     const { password, newPassword } = req.body;
@@ -512,6 +522,7 @@ const updateUser = async (req, res, next) => {
     patchedUser.confirmationCode = req.user.confirmationCode;
     patchedUser.email = req.user.email;
     patchedUser.isVerified = req.user.isVerified;
+    patchedUser.googleSignUp = req.user.googleSignUp;
     patchedUser.gender = req.user.gender;
     patchedUser.username = req.user.username;
     patchedUser.birthYear = req.user.birthYear;
@@ -582,7 +593,8 @@ const updateUser = async (req, res, next) => {
 //<!--SEC                                        DELETE USER                                                     ->
 
 const deleteUser = async (req, res, next) => {
-  try {
+  if (req.user.googleSignUp == false) {
+    try {
     console.log(req?.user?.password, "password");
     const _id = req?.user?._id;
     // I could also grab the pass and email through the req.user but I thought it safer this way.
@@ -669,6 +681,76 @@ const deleteUser = async (req, res, next) => {
         message: error.message,
       }) && next(error)
     );
+  }
+  } else {
+    try {
+      await User.findByIdAndDelete(req.user?._id);
+      deleteImgCloudinary(dataBaseUser.image);
+      try {
+        try {
+          await Comments.deleteMany({ creator: _id });
+          try {
+            await Comment.updateMany(
+              { likes: _id },
+              { $pull: { likes: _id } }
+            );
+            try {
+              await Room.updateMany(
+                { likes: _id },
+                { $pull: { likes: _id } }
+              );
+              try {
+                await Room.deleteMAny({ postedBy: _id });
+                try {
+                  await Post.deleteMany({ author: _id });
+                  try {
+                    await Post.updateMany(
+                      { likes: _id },
+                      { $pull: { likes: _id } }
+                    );
+                    try {
+                    } catch (error) {
+                      return res.status(404).json("Error pulling references");
+                    }
+                  } catch (error) {
+                    return res
+                      .status(404)
+                      .json("Error updating likes in posts.");
+                  }
+                } catch (error) {
+                  return res.status(404).json("Error deleting posts");
+                }
+              } catch (error) {
+                return res
+                  .status(404)
+                  .json("Error deleting room announcements.");
+              }
+            } catch (error) {
+              return res.status(404).json("Error pulling rooms likes.");
+            }
+          } catch (error) {
+            return res.status(404).json("Error pulling comments likes.");
+          }
+        } catch (error) {
+          return res.status(404).json("Error deleting comments.");
+        }
+      } catch (error) {
+        return res
+          .status(404)
+          .json("Error updating references to other models.");
+      }
+      const doesUserExist = await User.findById(req.user._id);
+      console.log(doesUserExist);
+      return res
+        .status(doesUserExist ? 404 : 200)
+        .json(
+          doesUserExist
+            ? "User not deleted. Please try again."
+            : "User deleted successfully."
+        );
+    } catch (error) {
+      return res.status(500).json("Error in delete catch");
+    }
   }
 };
 

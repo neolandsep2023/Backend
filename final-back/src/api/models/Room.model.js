@@ -25,7 +25,7 @@ const RoomSchema = new Schema(
     },
     available: { type: Boolean, required: true, default: true },
     surface: { type: Number, required: true },
-    bathroom: { type: Boolean, required: true },
+    bathrooms: { type: String, required: true, enum: ["0", "1","2","3+"] },
     publicLocation: [
       {
         type: String,

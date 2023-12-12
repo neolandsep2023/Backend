@@ -1,3 +1,3 @@
-const rolesEnum = ["superadmin", "admin", "rommateSeeker", "roomSeeker"]
+const rolesEnum = ["superadmin", "admin", "roommateSeeker", "roomSeeker"]
 
 module.exports = rolesEnum;

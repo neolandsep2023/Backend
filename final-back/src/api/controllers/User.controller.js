@@ -35,8 +35,6 @@ const redirectRegister = async (req, res, next) => {
     );
     if (!doesUserExist) {
 
-
-
       try {
 
         const doesUserNameExist = await User.findOne(
@@ -74,20 +72,10 @@ const redirectRegister = async (req, res, next) => {
           });
         }
   
-
       }else {
         if (req.file) deleteImgCloudinary(catchImage);
         return res.status(409).json("This username already exists.");
       }
-
-
-
-
-
-
-
-
-
 
         
       } catch (error) {

@@ -576,12 +576,12 @@ const updateUser = async (req, res, next) => {
     patchedUser.myPosts = req.user.myPosts;
     patchedUser.likedPosts = req.user.likedPosts;
 
-    if (req.body?.interests) {
-      const enumResult = enumCheck("interests",req.body?.interests);
-      patchedUser.interests = enumResult.check
-        ? req.body?.interests
-        : req.user.interests;
-    }
+    // if (req.body?.interests) {
+    //   const enumResult = enumCheck("interests",req.body?.interests);
+    //   patchedUser.interests = enumResult.check
+    //     ? req.body?.interests
+    //     : req.user.interests;
+    // }
     console.log(patchedUser.interests)
 
       if (req.body?.interests) {
@@ -589,14 +589,14 @@ const updateUser = async (req, res, next) => {
         console.log(interests);
         const requestInterests = interests.split(',');
         const requestInterestsInArray = [];
-        requestinterests.forEach((interest) => {
+        requestInterests.forEach((interest) => {
           interest = interest.trim();
           requestInterestsInArray.push(interest);
         });
         console.log(requestInterestsInArray, 'Final del forEach');
-        const enumResult = enumCheck("interests", requestInterestsInArray);
+        let enumResult = enumCheck("interests", requestInterestsInArray);
         console.log(enumResult, 'Enum result');
-        customBody.interests = enumResult.check
+        patchedUser.interests = enumResult.check
           ? requestInterestsInArray
           : req.user.interests;
       }
@@ -617,6 +617,7 @@ const updateUser = async (req, res, next) => {
       const updatedUser = await User.findById(req.user._id);
       const updatedKeys = Object.keys(req.body);
       const testingUpdate = [];
+
 
       updatedKeys.forEach((item) => {
         if (updatedUser[item] == req.body[item]) {
@@ -645,8 +646,8 @@ const updateUser = async (req, res, next) => {
           console.log(acc);
         });
         acc > 0
-          ? (test = { ...test, interests: false })
-          : (test = { ...test, interests: true });
+          ? testingUpdate['interests'] = false
+          : testingUpdate['interests'] = true
       }
 
 

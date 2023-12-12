@@ -618,7 +618,7 @@ const deleteUser = async (req, res, next) => {
                   { $pull: { likes: _id } }
                 );
                 try {
-                  await Room.deleteMAny({ postedBy: _id });
+                  await Room.deleteMany({ postedBy: _id });
                   try {
                     await Post.deleteMany({ author: _id });
                     try {

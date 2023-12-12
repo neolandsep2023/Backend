@@ -297,6 +297,8 @@ const getByLocation = async (req, res, next) => {
   }
 };
 
+//! ------------------ GET by POSTCODE ------------------
+
 const getByPostcode = async (req, res, next) => {
   try {
     const { postcode } = parseInt(req.params);
@@ -314,13 +316,15 @@ const getByPostcode = async (req, res, next) => {
   }
 };
 
+
+//! ------------------ GET by PROVVINCE ------------------
 const getByProvince = async (req, res, next) => {
   try {
     const { province } = req.params;
     const roomByProvince = await Room.find({ province: province }).populate(
       "postedBy"
     );
-    return roomByName
+    return roomByProvince
       ? res.status(200).json(roomByProvince)
       : res.status(404).json("we couldn't find the room");
   } catch (error) {

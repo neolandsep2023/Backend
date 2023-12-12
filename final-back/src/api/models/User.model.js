@@ -4,6 +4,7 @@ const mongoose = require("mongoose"); //? hacemos modelo
 const genderEnum = require("../../data/genderEnum");
 const interestsEnum = require("../../data/interestsEnum");
 const rolesEnum = require("../../data/rolesEnum");
+const habitsEnum = require("../../data/habitsEnum");
 
 const UserSchema = new mongoose.Schema(
   {
@@ -16,7 +17,7 @@ const UserSchema = new mongoose.Schema(
     },
     name: {
       type: String,
-      required: true,
+      // required: true,
       trim: true,
     },
     lastName: {
@@ -26,7 +27,7 @@ const UserSchema = new mongoose.Schema(
     },
     username: {
       type: String,
-      // required: true,
+      required: true,
       trim: true,
       unique: true,
     },
@@ -51,7 +52,7 @@ const UserSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: rolesEnum,
-      default: "lessee",
+      default: "roomSeeker",
     },
     confirmationCode: {
       type: Number,
@@ -74,6 +75,10 @@ const UserSchema = new mongoose.Schema(
         type: String,
         enum: interestsEnum,
     }],
+    habits: [{
+      type: String,
+      enum: habitsEnum,
+  }],
     sentComments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
     receivedComments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
     likedComments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],

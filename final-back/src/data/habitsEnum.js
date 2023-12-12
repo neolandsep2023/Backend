@@ -1,11 +1,13 @@
-const habits = [
-  "Student",
-  "Night worker",
-  "Early riser",
-  "Remote worker",
-  "Athlete",
+const habitsEnum = [
   "Artist",
+  "Athlete",
+  "Early riser",
+  "Freelancer",
   "Gamer",
   "Influencer",
-  "Freelancer"
+  "Night worker",
+  "Remote worker",
+  "Student"
 ];
+
+module.exports = habitsEnum

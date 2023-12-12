@@ -29,38 +29,83 @@ const redirectRegister = async (req, res, next) => {
   try {
     await User.syncIndexes();
     let confirmationCode = randomCode();
+    console.log('holaaaaaa')
     const doesUserExist = await User.findOne(
-      { username: req.body.username },
       { email: req.body.email }
     );
     if (!doesUserExist) {
-      const newUser = new User({ ...req.body, confirmationCode });
-      if (req.file) {
-        newUser.image = req.file.path;
-      } else {
-        newUser.image = "https://pic.onlinewebfonts.com/svg/img_181369.png";
+
+
+
+      try {
+
+        const doesUserNameExist = await User.findOne(
+          { username: req.body.username },
+        );
+
+          if(!doesUserNameExist){
+
+
+        const newUser = new User({ ...req.body, confirmationCode });
+        if (req.file) {
+          newUser.image = req.file.path;
+        } else {
+          newUser.image = "https://pic.onlinewebfonts.com/svg/img_181369.png";
+        }
+  
+        //   if(req.body.interests) {
+        //     req.body.interests.forEach(element => {
+        //         interestsEnum('interests', item)
+        //     });
+        //   }
+        try {
+          const savedUser = await newUser.save();
+          if (savedUser) {
+            return res.redirect(
+              307,
+              `http://localhost:8081/api/v1/users/register/sendMail/${savedUser._id}`
+            );
+          }
+        } catch (error) {
+          req.file && deleteImgCloudinary(catchImage);
+          return res.status(404).json({
+            error: "Error in save catch",
+            message: error.message,
+          });
+        }
+  
+
+      }else {
+        if (req.file) deleteImgCloudinary(catchImage);
+        return res.status(409).json("This username already exists.");
       }
 
-      //   if(req.body.interests) {
-      //     req.body.interests.forEach(element => {
-      //         interestsEnum('interests', item)
-      //     });
-      //   }
-      try {
-        const savedUser = await newUser.save();
-        if (savedUser) {
-          return res.redirect(
-            307,
-            `http://localhost:8081/api/v1/users/register/sendMail/${savedUser._id}`
-          );
-        }
+
+
+
+
+
+
+
+
+
+        
       } catch (error) {
         req.file && deleteImgCloudinary(catchImage);
-        return res.status(404).json({
-          error: "Error in save catch",
-          message: error.message,
-        });
+          return res.status(404).json({
+            error: "Error in save catch",
+            message: error.message,
+          });
       }
+      
+   
+
+
+
+
+
+
+
     } else {
       if (req.file) deleteImgCloudinary(catchImage);
       return res.status(409).json("This user already exists.");

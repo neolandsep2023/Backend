@@ -621,6 +621,8 @@ const updateUser = async (req, res, next) => {
 
       updatedKeys.forEach((item) => {
         if (updatedUser[item] == req.body[item]) {
+          console.log(updatedUser);
+          console.log("updatedItem" , updatedUser[item], "bodyItem",req.body[item] )
           if (updatedUser[item] != req.user[item]) {
             testingUpdate.push({ [item]: true });
           } else {
@@ -639,16 +641,22 @@ const updateUser = async (req, res, next) => {
         requestInterests.forEach((interest) => {
           interest = interest.trim();
           requestInterestsInArray.push(interest);
-        }); //aqui console.log de requestinterestsInArray va bien
+        });
+      
+        // aqui console.log de requestinterestsInArray va bien
         requestInterestsInArray.forEach((interest) => {
           console.log(interest);
           !updatedUser.interests.includes(interest) && acc++;
           console.log(acc);
         });
+      
         acc > 0
-          ? testingUpdate['interests'] = false
-          : testingUpdate['interests'] = true
+          ? (testingUpdate['interests'] = false)
+          : (testingUpdate['interests'] = true);
       }
+      console.log(testingUpdate['interests'], 'testingUpdateinterest'); 
+      //este da true, pero en insomnia da false ionno man
+      
 
 
 

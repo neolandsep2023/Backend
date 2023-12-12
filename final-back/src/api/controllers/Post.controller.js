@@ -109,14 +109,17 @@ const getAllPosts = async (req, res, next) => {
   }
 };
 
+
+//! --------------- GET BY POSTCODE ----------------
+
 const getByPostcode = async (req, res, next) => {
   try {
     const { postcode } = parseInt(req.params);
-    const roomByPostcode = await Room.find({ postcode: postcode }).populate(
-      "postedBy"
+    const postByPostcode = await Post.find({ postcode: postcode }).populate(
+      "author"
     );
-    return roomByName
-      ? res.status(200).json(roomByPostcode)
+    return postByPostcode
+      ? res.status(200).json(postByPostcode)
       : res.status(404).json("we couldn't find the room");
   } catch (error) {
     return res.status(500).json({
@@ -126,14 +129,15 @@ const getByPostcode = async (req, res, next) => {
   }
 };
 
+//! --------------- GET BY PROVINCE ----------------
 const getByProvince = async (req, res, next) => {
   try {
     const { province } = req.params;
-    const roomByProvince = await Room.find({ province: province }).populate(
-      "postedBy"
+    const postByProvince = await Post.find({ province: province }).populate(
+      "author"
     );
-    return roomByName
-      ? res.status(200).json(roomByProvince)
+    return postByProvince
+      ? res.status(200).json(postByProvince)
       : res.status(404).json("we couldn't find the room");
   } catch (error) {
     return res.status(500).json({

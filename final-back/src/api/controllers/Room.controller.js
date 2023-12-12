@@ -305,7 +305,7 @@ const getByPostcode = async (req, res, next) => {
     const roomByPostcode = await Room.find({ postcode: postcode }).populate(
       "postedBy"
     );
-    return roomByName
+    return roomByPostcode
       ? res.status(200).json(roomByPostcode)
       : res.status(404).json("we couldn't find the room");
   } catch (error) {

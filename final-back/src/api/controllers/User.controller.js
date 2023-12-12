@@ -582,6 +582,32 @@ const updateUser = async (req, res, next) => {
         ? req.body?.interests
         : req.user.interests;
     }
+    console.log(patchedUser.interests)
+
+      if (req.body?.interests) {
+        const { interests } = req.body;
+        console.log(interests);
+        const requestInterests = interests.split(',');
+        const requestInterestsInArray = [];
+        requestinterests.forEach((interest) => {
+          interest = interest.trim();
+          requestInterestsInArray.push(interest);
+        });
+        console.log(requestInterestsInArray, 'Final del forEach');
+        const enumResult = enumCheck("interests", requestInterestsInArray);
+        console.log(enumResult, 'Enum result');
+        customBody.interests = enumResult.check
+          ? requestInterestsInArray
+          : req.user.interests;
+      }
+              // Testeamos interests por separado porque es un array de un enum,
+        // entonces lo que hacemos es hacer un forEach sopesando si cada uno
+        // de los elementos forma parte del enum, sumando al accumulator si es cierto.
+        // Luego miramos si el accumulator ha subido, y en el caso de que sea mayor que 0,
+        // es decir, que en alguno de los forEach haya dado false, setteamos a false el resultado
+        // del testing de interests.
+
+
 
     try {
       await User.findByIdAndUpdate(req.user._id, patchedUser);
@@ -591,8 +617,6 @@ const updateUser = async (req, res, next) => {
       const updatedUser = await User.findById(req.user._id);
       const updatedKeys = Object.keys(req.body);
       const testingUpdate = [];
-
-
 
       updatedKeys.forEach((item) => {
         if (updatedUser[item] == req.body[item]) {
@@ -605,6 +629,28 @@ const updateUser = async (req, res, next) => {
           testingUpdate.push({ [item]: false });
         }
       });
+      
+      if (req.body.interests) {
+        const { interests } = req.body;
+        const requestInterests = interests.split(',');
+        const requestInterestsInArray = [];
+        let acc = 0;
+        requestInterests.forEach((interest) => {
+          interest = interest.trim();
+          requestInterestsInArray.push(interest);
+        }); //aqui console.log de requestinterestsInArray va bien
+        requestInterestsInArray.forEach((interest) => {
+          console.log(interest);
+          !updatedUser.interests.includes(interest) && acc++;
+          console.log(acc);
+        });
+        acc > 0
+          ? (test = { ...test, interests: false })
+          : (test = { ...test, interests: true });
+      }
+
+
+
         if (req.file) {
           updatedUser.image === catchImage
             ? testingUpdate.push({ image: true })

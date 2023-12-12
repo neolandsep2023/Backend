@@ -284,11 +284,11 @@ const getByLocation = async (req, res, next) => {
   try {
     const { location } = req.params;
     const roomByLocation = await Room.find({
-      publicLocation: { $regex: name, $options: "i" },
+      publicLocation: { $regex: location, $options: "i" },
     }).populate("postedBy");
-    return roomByName
-      ? res.status(200).json(roomByName)
-      : res.status(404).json("we couldn't find the room");
+    return roomByLocation.length > 0
+      ? res.status(200).json(roomByLocation)
+      : res.status(404).json("we couldn't find any rooms");
   } catch (error) {
     return res.status(500).json({
       error: "Error en el catch",
@@ -298,16 +298,15 @@ const getByLocation = async (req, res, next) => {
 };
 
 //! ------------------ GET by POSTCODE ------------------
-
 const getByPostcode = async (req, res, next) => {
   try {
-    const { postcode } = parseInt(req.params);
-    const roomByPostcode = await Room.find({ postcode: postcode }).populate(
+    const { postcode } = req.params;
+    const roomByPostcode = await Room.find({ postcode: +postcode }).populate(
       "postedBy"
     );
-    return roomByPostcode
+    return roomByPostcode.length > 0
       ? res.status(200).json(roomByPostcode)
-      : res.status(404).json("we couldn't find the room");
+      : res.status(404).json("we couldn't find any rooms");
   } catch (error) {
     return res.status(500).json({
       error: "Error en el catch",
@@ -316,17 +315,16 @@ const getByPostcode = async (req, res, next) => {
   }
 };
 
-
-//! ------------------ GET by PROVVINCE ------------------
+//! ------------------ GET by PROVINCE ------------------
 const getByProvince = async (req, res, next) => {
   try {
     const { province } = req.params;
-    const roomByProvince = await Room.find({ province: province }).populate(
+    const roomByProvince = await Room.find({ province: { $regex: province, $options: "i" } }).populate(
       "postedBy"
     );
-    return roomByProvince
+    return roomByProvince.length > 0
       ? res.status(200).json(roomByProvince)
-      : res.status(404).json("we couldn't find the room");
+      : res.status(404).json("we couldn't find any rooms");
   } catch (error) {
     return res.status(500).json({
       error: "Error en el catch",
@@ -477,6 +475,7 @@ module.exports = {
   sortRooms,
   filterRooms,
   filterEnumRooms,
+  getByLocation,
   getByProvince,
   getByPostcode,
 };

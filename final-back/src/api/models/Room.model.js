@@ -24,18 +24,33 @@ const RoomSchema = new Schema(
       ],
     },
     available: { type: Boolean, required: true, default: true },
-    // preferredGender: {type: String, required: true, enum: ["female", "male", "irrelevant"]},
-    // preferredAge: {type: String, required: true, enum: [
-    //   "18-25",
-    //   "26-35",
-    //   "36-45",
-    //   "+45",
-    //   "irrelevant"
-    // ]},
-
     surface: { type: Number, required: true },
     bathroom: { type: Boolean, required: true },
-    publicLocation: { type: String, required: true },
+    publicLocation: [
+      {
+        type: String,
+        required: true,
+        enum: [
+          "Andalucia",
+          "Aragon",
+          "Asturias",
+          "Islas Baleares",
+          "Canarias",
+          "Cantabria",
+          "Castilla-La Mancha",
+          "Castilla y Leon",
+          "Cataluña",
+          "Extremadura",
+          "Galicia",
+          "Madrid",
+          "Murcia",
+          "Navarra",
+          "La Rioja",
+          "Pais Vasco",
+          "Comunidad Valenciana"
+        ],
+      },
+    ],
     province: { type: String, required: true },
     postcode: { type: Number, required: true },
     petsAllowed: { type: Boolean, required: true },

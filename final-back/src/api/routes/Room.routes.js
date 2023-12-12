@@ -10,6 +10,7 @@ const {
   sortRooms,
   filterRooms,
   filterEnumRooms,
+  getByLocation,
   getByProvince,
   getByPostcode
 } = require("../controllers/Room.controller");
@@ -23,10 +24,11 @@ RoomRoutes.delete("/:id", deleteRoom);
 RoomRoutes.get("/:id", getById)
 RoomRoutes.get("/", getAll)
 RoomRoutes.get("/byName/:name", getByName)
+RoomRoutes.get("/byLocation/:location", getByLocation)
 RoomRoutes.get("/byPostcode/:postcode", getByPostcode)
 RoomRoutes.get("/byProvince/:province", getByProvince)
 RoomRoutes.get("/sort/rooms/:method/:value", sortRooms)
 RoomRoutes.get("/filter/rooms/:filter/:min/:max", filterRooms)
-RoomRoutes.get("/filter/rooms/:filter/:value", filterEnumRooms)
+RoomRoutes.get("/filterEnum/rooms/:filter/:value", filterEnumRooms)
 
 module.exports = RoomRoutes

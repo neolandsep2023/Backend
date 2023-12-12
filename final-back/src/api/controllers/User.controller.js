@@ -558,11 +558,14 @@ const updateUser = async (req, res, next) => {
     patchedUser.googleSignUp = req.user.googleSignUp;
     patchedUser.gender = req.user.gender;
     patchedUser.username = req.user.username;
-    patchedUser.birthYear = req.body?.birthYear ? req.body?.birthYear : req.user.birthYear;
+    patchedUser.birthYear = req?.body?.birthYear ? req?.body?.birthYear : req.user.birthYear;
     patchedUser.name = req.body?.name ? req.body.name : req.user.name;
     patchedUser.lastName = req.body?.lastName
       ? req.body.lastName
       : req.user.lastName;
+      patchedUser.habits = req?.body?.habits
+      ? req.body.habits
+      : req.user.habits;
     patchedUser.description = req.body?.description
       ? req.body.description
       : req.user.description;
@@ -574,7 +577,7 @@ const updateUser = async (req, res, next) => {
     patchedUser.likedPosts = req.user.likedPosts;
 
     if (req.body?.interests) {
-      const enumResult = enumCheck(req.body?.gender);
+      const enumResult = enumCheck("interests",req.body?.interests);
       patchedUser.interests = enumResult.check
         ? req.body?.interests
         : req.user.interests;
@@ -582,7 +585,7 @@ const updateUser = async (req, res, next) => {
 
     try {
       await User.findByIdAndUpdate(req.user._id, patchedUser);
-      req.file && deleteImgCloudinary(req.user.userEmail);
+      req?.file && deleteImgCloudinary(req?.user?.image);
 
       //------testing---------
       const updatedUser = await User.findById(req.user._id);
@@ -599,14 +602,15 @@ const updateUser = async (req, res, next) => {
         } else {
           testingUpdate.push({ [item]: false });
         }
-
+      });
         if (req.file) {
           updatedUser.image === catchImage
             ? testingUpdate.push({ image: true })
             : testingUpdate.push({ image: false });
         }
+        console.log("entro", updatedUser)
         return res.status(200).json({ updatedUser, testingUpdate });
-      });
+      
     } catch (error) {
       return res
         .status(404)

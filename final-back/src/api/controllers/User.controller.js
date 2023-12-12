@@ -592,8 +592,10 @@ const updateUser = async (req, res, next) => {
       const updatedKeys = Object.keys(req.body);
       const testingUpdate = [];
 
+
+
       updatedKeys.forEach((item) => {
-        if (updatedUser[item] === req.body[item]) {
+        if (updatedUser[item] == req.body[item]) {
           if (updatedUser[item] != req.user[item]) {
             testingUpdate.push({ [item]: true });
           } else {

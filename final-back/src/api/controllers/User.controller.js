@@ -576,28 +576,17 @@ const updateUser = async (req, res, next) => {
     patchedUser.myPosts = req.user.myPosts;
     patchedUser.likedPosts = req.user.likedPosts;
 
-    // if (req.body?.interests) {
-    //   const enumResult = enumCheck("interests",req.body?.interests);
-    //   patchedUser.interests = enumResult.check
-    //     ? req.body?.interests
-    //     : req.user.interests;
-    // }
-    console.log(patchedUser.interests)
+
+    console.log("PATCHED USERRRRRRRR",patchedUser)
 
       if (req.body?.interests) {
-        const { interests } = req.body;
-        console.log(interests);
-        const requestInterests = interests.split(',');
-        const requestInterestsInArray = [];
-        requestInterests.forEach((interest) => {
-          interest = interest.trim();
-          requestInterestsInArray.push(interest);
-        });
-        console.log(requestInterestsInArray, 'Final del forEach');
-        let enumResult = enumCheck("interests", requestInterestsInArray);
+        const { interests } = req.body;   //! ES UN ARRAY
+
+        console.log(interests, 'Final del forEach');
+        let enumResult = enumCheck("interests", interests);
         console.log(enumResult, 'Enum result');
         patchedUser.interests = enumResult.check
-          ? requestInterestsInArray
+          ? interests
           : req.user.interests;
       }
               // Testeamos interests por separado porque es un array de un enum,
@@ -613,61 +602,65 @@ const updateUser = async (req, res, next) => {
       await User.findByIdAndUpdate(req.user._id, patchedUser);
       req?.file && deleteImgCloudinary(req?.user?.image);
 
-      //------testing---------
+      //------testing--------
+
+      try {
+        
       const updatedUser = await User.findById(req.user._id);
       const updatedKeys = Object.keys(req.body);
       const testingUpdate = [];
 
 
       updatedKeys.forEach((item) => {
+
+        if( item != "interests"){
         if (updatedUser[item] == req.body[item]) {
-          console.log(updatedUser);
-          console.log("updatedItem" , updatedUser[item], "bodyItem",req.body[item] )
           if (updatedUser[item] != req.user[item]) {
             testingUpdate.push({ [item]: true });
           } else {
             testingUpdate.push({ [item]: "Information is the same." });
           }
         } else {
-          testingUpdate.push({ [item]: false });
+           testingUpdate.push({ [item]: false });
+          
         }
+      }
       });
-      
+      console.log("aquiii", testingUpdate)
+
       if (req.body.interests) {
-        const { interests } = req.body;
-        const requestInterests = interests.split(',');
-        const requestInterestsInArray = [];
+        const { interests } = req.body;   //! ES UN ARRAY
+  
         let acc = 0;
-        requestInterests.forEach((interest) => {
-          interest = interest.trim();
-          requestInterestsInArray.push(interest);
-        });
-      
-        // aqui console.log de requestinterestsInArray va bien
-        requestInterestsInArray.forEach((interest) => {
-          console.log(interest);
+
+        
+        interests.forEach((interest) => {
           !updatedUser.interests.includes(interest) && acc++;
-          console.log(acc);
         });
       
         acc > 0
           ? (testingUpdate['interests'] = false)
           : (testingUpdate['interests'] = true);
       }
-      console.log(testingUpdate['interests'], 'testingUpdateinterest'); 
-      //este da true, pero en insomnia da false ionno man
-      
-
-
+      console.log(testingUpdate)
 
         if (req.file) {
           updatedUser.image === catchImage
             ? testingUpdate.push({ image: true })
             : testingUpdate.push({ image: false });
         }
-        console.log("entro", updatedUser)
+        // console.log("entro", updatedUser)
         return res.status(200).json({ updatedUser, testingUpdate });
       
+
+      } catch (error) {
+        return res
+        .status(404)
+        .json({ error: "Error in updating the user", message: error.message });
+      }
+  
+
+
     } catch (error) {
       return res
         .status(404)
@@ -683,6 +676,7 @@ const updateUser = async (req, res, next) => {
     );
   }
 };
+
 
 //<!--SEC                                        DELETE USER                                                     ->
 

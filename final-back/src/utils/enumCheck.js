@@ -15,6 +15,7 @@ const enumCheck = (type, value) => {
 
     case "interests":
       acc = 0;
+      // console.log('ENTRO EN ENUMMMMMM', value, value.length)
       if (value.length > 0) {
         value.forEach((element) => {
           if (interestsEnum.includes(element)) {

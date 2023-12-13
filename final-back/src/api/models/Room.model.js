@@ -25,8 +25,13 @@ const RoomSchema = new Schema(
     },
     available: { type: Boolean, required: true, default: true },
     surface: { type: Number, required: true },
-    bathrooms: { type: String, required: true, enum: ["0", "1","2","3+"] },
-    publicLocation: [
+    bathrooms: { type: String, required: true, enum: ["0", "1", "2", "3+"] },
+    petsAllowed: { type: Boolean, required: true },
+    exterior: { type: Boolean, required: true },
+    // deposit: {type: Boolean, required: true},
+    // depositPrice: {type: Number},
+    roommates: { type: Number, required: true },
+    publicLocation: 
       {
         type: String,
         required: true,
@@ -47,17 +52,12 @@ const RoomSchema = new Schema(
           "Navarra",
           "La Rioja",
           "Pais Vasco",
-          "Comunidad Valenciana"
+          "Comunidad Valenciana",
         ],
       },
-    ],
     province: { type: String, required: true },
     postcode: { type: Number, required: true },
-    petsAllowed: { type: Boolean, required: true },
-    exterior: { type: Boolean, required: true },
-    // deposit: {type: Boolean, required: true},
-    // depositPrice: {type: Number},
-    roommates: { type: Number, required: true },
+
     commoditiesRoom: [
       {
         type: String,

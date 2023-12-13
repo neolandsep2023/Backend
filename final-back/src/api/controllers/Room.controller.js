@@ -48,8 +48,6 @@ const createRoom = async (req, res, next) => {
         deleteImgCloudinary(catchImg[a]);
       }
     }
-
-    console.error("Error creating room:", error);
     return res.status(500).json({
       error: "Error creating room",
       message: error.message,
@@ -249,7 +247,7 @@ const deleteRoom = async (req, res, next) => {
 const getById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const roomById = await Room.findById(id).populate(postedBy);
+    const roomById = await Room.findById(id).populate('postedBy');
     return roomById
       ? res.status(200).json(roomById)
       : res.status(404).json("we couldn't find the room");

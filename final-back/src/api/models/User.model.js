@@ -52,7 +52,6 @@ const UserSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: rolesEnum,
-      default: "roomSeeker",
     },
     confirmationCode: {
       type: Number,

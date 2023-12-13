@@ -896,7 +896,7 @@ const getUserByIdPopulated = async (req, res, next) => {
   try {
     const { id } = req.params;
     const userById = await User.findById(id).populate(
-      "sentComments receivedComments likedComments savedRooms myPosts myRooms likedPosts"
+      "sentComments receivedComments likedComments savedRooms savedPosts myPosts myRooms likedPosts"
     );
     if (userById) {
       return res.status(200).json(userById);

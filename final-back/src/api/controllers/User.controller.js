@@ -398,9 +398,10 @@ const passChangeWhileLoggedOut = async (req, res, next) => {
     const { email } = req.body;
     console.log(req.body);
     const userFromDB = await User.findOne({ email });
+    console.log(userFromDB)
     if (userFromDB) {
-      if (userFromDB.googleSignUp == true) {
-        return res.status(404).json('Sign in with Google.')}
+      // if (userFromDB.googleSignUp == true) {
+      //   return res.status(404).json('Sign in with Google.')}
       console.log("userFromDB antes del redirect:", userFromDB._id);
       return res.redirect(
         307,
@@ -421,6 +422,7 @@ const passChangeWhileLoggedOut = async (req, res, next) => {
 //!REDIRECT DE SEND PASSWORD DE LA ANTERIOR!!
 const sendPassword = async (req, res, next) => {
   try {
+    console.log("entro aqui")
     const { id } = req.params;
     console.log({ id });
     const userById = await User.findById(id);
@@ -456,14 +458,13 @@ const sendPassword = async (req, res, next) => {
         try {
           await User.findByIdAndUpdate(id, { password: newHashedPassword });
           const updatedUser = await User.findById(id);
-          console.log(newHashedPassword);
-          console.log(updatedUser.password);
+          // console.log(newHashedPassword);
+          // console.log(updatedUser.password);
 
           if (bcrypt.compareSync(newPassword, updatedUser.password)) {
-            return res.status(200).json({
-              message: "Mail sent and user updated successfully.",
-              info,
-            });
+           
+            return res.status(200).json({ updateUser: true, sendPassword: true })
+
           } else {
             return res.status(404).json({
               message:

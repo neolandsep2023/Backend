@@ -398,9 +398,10 @@ const passChangeWhileLoggedOut = async (req, res, next) => {
     const { email } = req.body;
     console.log(req.body);
     const userFromDB = await User.findOne({ email });
+    console.log(userFromDB)
     if (userFromDB) {
-      if (userFromDB.googleSignUp == true) {
-        return res.status(404).json('Sign in with Google.')}
+      // if (userFromDB.googleSignUp == true) {
+      //   return res.status(404).json('Sign in with Google.')}
       console.log("userFromDB antes del redirect:", userFromDB._id);
       return res.redirect(
         307,
@@ -421,6 +422,7 @@ const passChangeWhileLoggedOut = async (req, res, next) => {
 //!REDIRECT DE SEND PASSWORD DE LA ANTERIOR!!
 const sendPassword = async (req, res, next) => {
   try {
+    console.log("entro aqui")
     const { id } = req.params;
     console.log({ id });
     const userById = await User.findById(id);
@@ -456,14 +458,13 @@ const sendPassword = async (req, res, next) => {
         try {
           await User.findByIdAndUpdate(id, { password: newHashedPassword });
           const updatedUser = await User.findById(id);
-          console.log(newHashedPassword);
-          console.log(updatedUser.password);
+          // console.log(newHashedPassword);
+          // console.log(updatedUser.password);
 
           if (bcrypt.compareSync(newPassword, updatedUser.password)) {
-            return res.status(200).json({
-              message: "Mail sent and user updated successfully.",
-              info,
-            });
+           
+            return res.status(200).json({ updateUser: true, sendPassword: true })
+
           } else {
             return res.status(404).json({
               message:
@@ -551,18 +552,21 @@ const updateUser = async (req, res, next) => {
 
     patchedUser._id = req.user._id;
     patchedUser.password = req.user.password;
-    patchedUser.role = req.user.role;
+    patchedUser.role = req?.body?.role ? req?.body?.role : req.user.role;
     patchedUser.confirmationCode = req.user.confirmationCode;
     patchedUser.email = req.user.email;
     patchedUser.isVerified = req.user.isVerified;
     patchedUser.googleSignUp = req.user.googleSignUp;
     patchedUser.gender = req.user.gender;
     patchedUser.username = req.user.username;
-    patchedUser.birthYear = req.body?.birthYear ? req.body?.birthYear : req.user.birthYear;
+    patchedUser.birthYear = req?.body?.birthYear ? req?.body?.birthYear : req.user.birthYear;
     patchedUser.name = req.body?.name ? req.body.name : req.user.name;
     patchedUser.lastName = req.body?.lastName
       ? req.body.lastName
       : req.user.lastName;
+      patchedUser.habits = req?.body?.habits
+      ? req.body.habits
+      : req.user.habits;
     patchedUser.description = req.body?.description
       ? req.body.description
       : req.user.description;
@@ -573,40 +577,91 @@ const updateUser = async (req, res, next) => {
     patchedUser.myPosts = req.user.myPosts;
     patchedUser.likedPosts = req.user.likedPosts;
 
-    if (req.body?.interests) {
-      const enumResult = enumCheck(req.body?.gender);
-      patchedUser.interests = enumResult.check
-        ? req.body?.interests
-        : req.user.interests;
-    }
+
+    console.log("PATCHED USERRRRRRRR",patchedUser)
+
+      if (req.body?.interests) {
+        const { interests } = req.body;   //! ES UN ARRAY
+
+        console.log(interests, 'Final del forEach');
+        let enumResult = enumCheck("interests", interests);
+        console.log(enumResult, 'Enum result');
+        patchedUser.interests = enumResult.check
+          ? interests
+          : req.user.interests;
+      }
+              // Testeamos interests por separado porque es un array de un enum,
+        // entonces lo que hacemos es hacer un forEach sopesando si cada uno
+        // de los elementos forma parte del enum, sumando al accumulator si es cierto.
+        // Luego miramos si el accumulator ha subido, y en el caso de que sea mayor que 0,
+        // es decir, que en alguno de los forEach haya dado false, setteamos a false el resultado
+        // del testing de interests.
+
+
 
     try {
       await User.findByIdAndUpdate(req.user._id, patchedUser);
-      req.file && deleteImgCloudinary(req.user.userEmail);
+      req?.file && deleteImgCloudinary(req?.user?.image);
 
-      //------testing---------
+      //------testing--------
+
+      try {
+        
       const updatedUser = await User.findById(req.user._id);
       const updatedKeys = Object.keys(req.body);
       const testingUpdate = [];
 
+
       updatedKeys.forEach((item) => {
-        if (updatedUser[item] === req.body[item]) {
+
+        if( item != "interests"){
+        if (updatedUser[item] == req.body[item]) {
           if (updatedUser[item] != req.user[item]) {
             testingUpdate.push({ [item]: true });
           } else {
             testingUpdate.push({ [item]: "Information is the same." });
           }
         } else {
-          testingUpdate.push({ [item]: false });
+           testingUpdate.push({ [item]: false });
+          
         }
+      }
+      });
+      console.log("aquiii", testingUpdate)
+
+      if (req.body.interests) {
+        const { interests } = req.body;   //! ES UN ARRAY
+  
+        let acc = 0;
+
+        
+        interests.forEach((interest) => {
+          !updatedUser.interests.includes(interest) && acc++;
+        });
+      
+        acc > 0
+          ? (testingUpdate['interests'] = false)
+          : (testingUpdate['interests'] = true);
+      }
+      console.log(testingUpdate)
 
         if (req.file) {
           updatedUser.image === catchImage
             ? testingUpdate.push({ image: true })
             : testingUpdate.push({ image: false });
         }
+        // console.log("entro", updatedUser)
         return res.status(200).json({ updatedUser, testingUpdate });
-      });
+      
+
+      } catch (error) {
+        return res
+        .status(404)
+        .json({ error: "Error in updating the user", message: error.message });
+      }
+  
+
+
     } catch (error) {
       return res
         .status(404)
@@ -622,6 +677,7 @@ const updateUser = async (req, res, next) => {
     );
   }
 };
+
 
 //<!--SEC                                        DELETE USER                                                     ->
 
@@ -835,7 +891,7 @@ const getUserByIdPopulated = async (req, res, next) => {
   try {
     const { id } = req.params;
     const userById = await User.findById(id).populate(
-      "sentComments receivedComments likedComments savedRooms myPosts myRooms likedPosts"
+      "sentComments receivedComments likedComments savedRooms savedPosts myPosts myRooms likedPosts"
     );
     if (userById) {
       return res.status(200).json(userById);

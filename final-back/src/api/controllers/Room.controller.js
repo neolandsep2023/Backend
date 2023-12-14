@@ -48,8 +48,6 @@ const createRoom = async (req, res, next) => {
         deleteImgCloudinary(catchImg[a]);
       }
     }
-
-    console.error("Error creating room:", error);
     return res.status(500).json({
       error: "Error creating room",
       message: error.message,

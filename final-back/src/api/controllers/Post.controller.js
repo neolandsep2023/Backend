@@ -6,7 +6,6 @@ const Comment = require("../models/Comment.model");
 
 const createPost = async (req, res) => {
   let catchImg = req.file?.path; //TODO-------- ESTO TIENE QUE SER UN ARRAY DE FOTOS??? --------
-  console.log(catchImg)
   try {
     await Post.syncIndexes();
     const body = req?.body;
@@ -15,7 +14,7 @@ const createPost = async (req, res) => {
     console.log("entro aqui", user._id);
 
     newPost.author = user._id;
-    newPost.image = req.file ? req.file.path : "https://thumbs.dreamstime.com/b/teamwork-group-friends-logo-image-holding-each-other-39918563.jpg";
+    newPost.image = catchImg;
     newPost.title = body.title;
     newPost.text = body.text;
     newPost.type = body.type;
@@ -24,15 +23,26 @@ const createPost = async (req, res) => {
 
     const savedPost = await newPost.save();
 
+    const datedPosts = await Post.updateMany(
+      {},
+      { $convert: { input: "$createdAt", to: "date" } }
+    );
+
     try {
       await User.findByIdAndUpdate(
         user._id, //---- que se creen los posts en el user
         { $push: { myPosts: savedPost._id } }
       );
 
-      return res
-        .status(savedPost ? 200 : 404)
-        .json(savedPost ? savedPost : "Error saving post");
+      if(savedPost){
+        return res.status(200).json({
+          savedPost,
+          datedPosts
+        })
+      }else{
+        return res.status(404).json("Error saving post")
+      }
+
     } catch (error) {
       return res.status(404).json({
         error: "no se encontro por id",
@@ -82,11 +92,18 @@ const getPostById = async (req, res, next) => {
 //! --------------- GET ALL -- POPULATED!! ----------------
 const getAllPostsPopulated = async (req, res, next) => {
   try {
-    const allPosts = await Post.find().populate("author likes comments");
+    const allPosts = await Post.find().sort({ createdAt: -1 }).populate("author likes comments");
 
-    return res
-      .status(allPosts.length > 0 ? 200 : 404)
-      .json(allPosts.length > 0 ? allPosts : "posts Not Found");
+
+    if(allPosts.length>0){
+      return res.status(200).json({
+        allPosts
+      })
+
+    }else{
+      return res.status(404).json("posts Not Found")
+    }
+
   } catch (error) {
     return res.status(500).json({
       error: "Error en el catch",
@@ -188,15 +205,13 @@ const updatePost = async (req, res) => {
           province: req.body?.province ? req.body.province : roomById.province,
           author: postById.author,
           type: postById.type,
-          roommates: postById.roommates,
-          room: postById.room,
           likes: postById.likes,
           comments: postById.comments,
         };
 
         try {
           await Post.findByIdAndUpdate(id, customBody).populate(
-            "author likes comments roommates room"
+            "author likes comments"
           );
           if (req.file?.path) {
             deleteImgCloudinary(postById.image);

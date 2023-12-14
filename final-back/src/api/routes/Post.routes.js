@@ -8,6 +8,7 @@ const {
   getAllPostsPopulated,
   getAllPosts,
   postByType,
+  allPostByType,
   getPostByLocation,
   deletePost,
   updatePost,
@@ -23,8 +24,9 @@ PostRoutes.get("/getById/populated/:id", getPostByIdPopulate);
 PostRoutes.get("/getAll/", getAllPosts);
 PostRoutes.get("/getAll/populated/", getAllPostsPopulated);
 PostRoutes.get("/getByType/:type", postByType);
+PostRoutes.get("/getAllByType/:type", allPostByType);
 PostRoutes.get("/getByLocation/:location", getPostByLocation);
-PostRoutes.get("/search", searchPost);
+PostRoutes.get("/search/:search", searchPost);
 PostRoutes.get("/byPostcode/:postcode", getByPostcode);
 PostRoutes.get("/byProvince/:province", getByProvince);
 

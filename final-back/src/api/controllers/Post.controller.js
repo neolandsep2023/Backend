@@ -175,7 +175,7 @@ const postByType = async (req, res, next) => {
       /*  --EX  En este caso, $IN lo que hace es buscar que objetos
             --EX cumplen con la categoria que tenemos. Es decir, 
             --EX encuentra los lifters que IN weightCategory tengan category  */
-    });
+    }).sort({ createdAt: -1 }).populate("author likes comments");
     return res.status(200).json(postsByType);
   } catch (error) {
     return res.status(500).json({
@@ -184,6 +184,32 @@ const postByType = async (req, res, next) => {
     });
   }
 };
+
+const allPostByType = async (req, res, next) => {
+  console.log(req.params)
+  const { type } = req.params;
+  try {
+    const postsByType = await Post.find({
+      type: { $in: type },
+      /*  --EX  En este caso, $IN lo que hace es buscar que objetos
+            --EX cumplen con la categoria que tenemos. Es decir, 
+            --EX encuentra los lifters que IN weightCategory tengan category  */
+    }).sort({ createdAt: -1 }).populate("author likes comments");
+
+
+    console.log(postsByType)
+    return res.status(200).json(postsByType);
+
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error en el catch",
+      message: error.message,
+    });
+  }
+};
+
+
+
 
 //! ---------------- UPDATE -----------------
 
@@ -287,24 +313,81 @@ const updatePost = async (req, res) => {
 //! ---------------- SEARCH -----------------
 
 const searchPost = async (req, res, next) => {
-  try {
-    const { search } = req.body;
-    const postByTitleSearch = await Post.find({
-      title: { $regex: search, $options: "i" },
-    }).populate("author likes");
-    const postByTextSearch = await Post.find({
-      text: { $regex: search, $options: "i" },
-    }).populate("author likes");
 
-    if (postByTitleSearch[0] || postByTextSearch[0]) {
-      console.log("entro");
-      return res.status(200).json({
-        postByTitleSearch,
-        postByTextSearch,
-      });
+  try {
+    let resArrayRoommSeeker = []
+    let resArrayRoommateSeeker = []
+
+    const { search } = req.params;
+    const roomSeekerTitleSearch = await Post.find({
+      type: { $in: "RoomSeeker" },
+      title: { $regex: search, $options: "i" },
+    }).sort({ createdAt: -1 }).populate("author likes");
+    const roomSeekerTextSearch = await Post.find({
+      type: { $in: "RoomSeeker" },
+      text: { $regex: search, $options: "i" },
+    }).sort({ createdAt: -1 }).populate("author likes");
+
+    if (roomSeekerTitleSearch[0] || roomSeekerTextSearch[0]) {
+      
+      roomSeekerTitleSearch.forEach((post)=>{
+        resArrayRoommSeeker.push(post)
+      })
+      roomSeekerTextSearch.forEach((post)=>{
+        resArrayRoommSeeker.push(post)
+      })
     } else {
       return res.status(404).json("Not Found");
     }
+
+    try {
+      
+
+      const roommateSeekerTitleSearch = await Post.find({
+        type: { $in: "RoommateSeeker" },
+        title: { $regex: search, $options: "i" },
+      }).sort({ createdAt: -1 }).populate("author likes");
+      const roommateSeekerTextSearch = await Post.find({
+        type: { $in: "RoommateSeeker" },
+        text: { $regex: search, $options: "i" },
+      }).sort({ createdAt: -1 }).populate("author likes");
+  
+      if (roommateSeekerTitleSearch[0] || roommateSeekerTextSearch[0]) {
+        
+        roommateSeekerTitleSearch.forEach((post)=>{
+          resArrayRoommateSeeker.push(post)
+        })
+        roommateSeekerTextSearch.forEach((post)=>{
+          resArrayRoommateSeeker.push(post)
+        })
+
+
+ } else {
+      return res.status(404).json("Not Found");
+    }
+
+   
+
+
+
+      console.log("entro");
+      return res.status(200).json({
+        resArrayRoommSeeker,
+        resArrayRoommateSeeker
+      });
+
+
+
+
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error en el catch",
+      message: error.message,
+    });
+  }
+
+
+
   } catch (error) {
     return res.status(500).json({
       error: "Error en el catch",
@@ -383,6 +466,7 @@ module.exports = {
   getAllPosts,
   getPostByLocation,
   postByType,
+  allPostByType,
   deletePost,
   updatePost,
   searchPost,

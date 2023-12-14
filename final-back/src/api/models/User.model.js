@@ -93,6 +93,9 @@ const UserSchema = new mongoose.Schema(
     myRooms: [{type: mongoose.Schema.Types.ObjectId, ref: "Room"}],
     myInterests: [{type: mongoose.Schema.Types.ObjectId, ref: "Post"}],
     likedPosts: [{type: mongoose.Schema.Types.ObjectId, ref: "Post"}],
+    // iLiveIn: [{type: mongoose.Schema.Types.ObjectId, ref: "Room"}],
+    postsIAmIn: [{type: mongoose.Schema.Types.ObjectId, ref: "Post"}],
+
   },
   {
     timestamps: true,

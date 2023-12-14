@@ -559,6 +559,7 @@ const updateUser = async (req, res, next) => {
     patchedUser.googleSignUp = req.user.googleSignUp;
     patchedUser.gender = req.user.gender;
     patchedUser.username = req.user.username;
+    patchedUser.postsIAmIn = req.user.postsIAmIn;
     patchedUser.birthYear = req?.body?.birthYear ? req?.body?.birthYear : req.user.birthYear;
     patchedUser.name = req.body?.name ? req.body.name : req.user.name;
     patchedUser.lastName = req.body?.lastName

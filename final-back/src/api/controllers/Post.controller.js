@@ -6,6 +6,7 @@ const Comment = require("../models/Comment.model");
 
 const createPost = async (req, res) => {
   let catchImg = req.file?.path; //TODO-------- ESTO TIENE QUE SER UN ARRAY DE FOTOS??? --------
+  console.log(catchImg)
   try {
     await Post.syncIndexes();
     const body = req?.body;
@@ -14,7 +15,7 @@ const createPost = async (req, res) => {
     console.log("entro aqui", user._id);
 
     newPost.author = user._id;
-    newPost.image = catchImg;
+    newPost.image = req.file ? req.file.path : "https://thumbs.dreamstime.com/b/teamwork-group-friends-logo-image-holding-each-other-39918563.jpg";
     newPost.title = body.title;
     newPost.text = body.text;
     newPost.type = body.type;
@@ -187,13 +188,15 @@ const updatePost = async (req, res) => {
           province: req.body?.province ? req.body.province : roomById.province,
           author: postById.author,
           type: postById.type,
+          roommates: postById.roommates,
+          room: postById.room,
           likes: postById.likes,
           comments: postById.comments,
         };
 
         try {
           await Post.findByIdAndUpdate(id, customBody).populate(
-            "author likes comments"
+            "author likes comments roommates room"
           );
           if (req.file?.path) {
             deleteImgCloudinary(postById.image);

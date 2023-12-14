@@ -95,8 +95,9 @@ const createRoomReview = async (req, res, next) => {
     const commentBody = {
       textComment: req.body.textComment,
       creator: req.user._id,
-      commentType: "public",
+      type: "public",
       commentedRoom: req.params.id,
+      rating: req?.body?.rating,
     };
     const newComment = new Comment(commentBody);
     try {
@@ -148,7 +149,7 @@ const createUserReview = async (req, res, next) => {
     const commentBody = {
       textComment: req.body.textComment,
       creator: req.user._id,
-      commentType: "public",
+      type: "public",
       commentedUser: req.params.id,
     };
     const newComment = new Comment(commentBody);
@@ -197,8 +198,9 @@ const createUserReview = async (req, res, next) => {
 //! ---------------------------------------------------------------------
 
 const getAll = async (req, res, next) => {
+  const {id} = req.params;
   try {
-    const allComments = await Comment.find({ type: "public" });
+    const allComments = await Comment.find({$and: [{ "type": "public" }, {$or : [{"commentedUser": id}, {"commentedRoom": id}, {"commentedPost": id}]}]}).populate("creator");
     if (allComments) {
       return res.status(200).json(allComments);
     } else {

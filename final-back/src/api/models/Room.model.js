@@ -42,7 +42,7 @@ const RoomSchema = new Schema(
           "Cantabria",
           "Castilla-La Mancha",
           "Castilla y Leon",
-          "Cataluña",
+          "Cataluna",
           "Extremadura",
           "Galicia",
           "Madrid",

@@ -16,7 +16,7 @@ const CommentRoutes = require("express").Router();
 CommentRoutes.post("/createPostComment/:idPost", [isAuth], createPostComment)
 CommentRoutes.post("/createRoomReview/:id", [isAuth], createRoomReview)
 CommentRoutes.post("/createUserReview/:id", [isAuth], createUserReview)
-CommentRoutes.get("/getAll", getAll)
+CommentRoutes.get("/getAll/:id", getAll)
 CommentRoutes.delete("/delete/:id", [isCommentOwner], deleteComment)
 
 

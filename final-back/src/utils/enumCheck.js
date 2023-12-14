@@ -2,7 +2,8 @@ const genderEnum = require("../data/genderEnum");
 const interestsEnum = require("../data/interestsEnum");
 const commoditiesRoomEnum = require("../data/commoditiesRoomEnum")
 const commoditiesHomeEnum = require("../data/commoditiesHomeEnum")
-const housingTypeEnum = require("../data/housingTypeEnum")
+const housingTypeEnum = require("../data/housingTypeEnum");
+const publicLocationEnum = require("../data/publicLocationEnum");
 
 const enumCheck = (type, value) => {
   let acc
@@ -26,6 +27,9 @@ const enumCheck = (type, value) => {
 
     case "housingType":
       return housingTypeEnum.includes(value) ? {check: true, value} : {cehck: false};
+
+    case "publicLocation":
+      return publicLocationEnum.includes(value) ? {check: true, value} : {cehck: false};
 
     case "commoditiesRoom":
       acc = 0;

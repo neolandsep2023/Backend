@@ -59,20 +59,21 @@ const createRoom = async (req, res, next) => {
 
 //! ------------------ UPDATE ------------------
 const updateRoom = async (req, res, next) => {
-  console.log("holaaa");
   await Room.syncIndexes();
   let catchImg = req.files;
-  console.log(catchImg);
   try {
     const { id } = req.params;
     const roomById = await Room.findById(id);
     if (roomById) {
       const oldImg = roomById.image;
       const images = [];
-      catchImg.map((image) => {
-        //? como catchImg (req.files) es un array de objetos, tengo que recorrerlo y de cada objeto quedarme con el path para ser eso lo que meto en la room
-        images.push(image.path);
-      });
+      if (catchImg) {
+        catchImg.map((image) => {
+          //? como catchImg (req.files) es un array de objetos, tengo que recorrerlo y de cada objeto quedarme con el path para ser eso lo que meto en la room
+          images.push(image.path);
+        });
+      }
+      console.log(req.body.postcode)
 
       const customBody = {
         _id: roomById._id,
@@ -84,53 +85,62 @@ const updateRoom = async (req, res, next) => {
         available: req.body?.available
           ? req.body.available
           : roomById.available,
+        type: roomById.type,
+        publicLocation: roomById.publicLocation,
+        commoditiesHome: roomById.commoditiesHome,
+        commoditiesRoom: roomById.commoditiesRoom,
+        roommates: req.body?.roommates ? req.body.roommates : roomById.roommates,
         surface: req.body?.surface ? req.body.surface : roomById.surface,
-        bathroom: req.body?.bathroom ? req.body.bathroom : roomById.bathroom,
-        publicLocation: req.body?.publicLocation
-          ? req.body.publicLocation
-          : roomById.publicLocation,
+        bathrooms: req.body?.bathrooms ? req.body.bathrooms : roomById.bathrooms,
         postcode: req.body?.postcode ? req.body.postcode : roomById.postcode,
         province: req.body?.province ? req.body.province : roomById.province,
         petsAllowed: req.body?.petsAllowed
           ? req.body.petsAllowed
           : roomById.petsAllowed,
         exterior: req.body?.exterior ? req.body.exterior : roomById.exterior,
-        // deposit: req.body?.deposit ? req.body.deposit : roomById.deposit,
-        // depositPrice: req.body?.depositPrice ? req.body.depositPrice : roomById.depositPrice,
         roommates: req.body?.roommates ? req.body.roommates : roomById.roommates,
-        // price: req.body?.price ? req.body.price : roomById.price,
       };
+
       //todo ------------ ENUM (type) ------------
       if (req.body?.type) {
-        const resultEnum = enumCheck(type, req.body?.type); //? checkea si el valor introducido coincide con el enum (enumOk en utils) y devuelve check: true/false
-        resultEnum.check
-          ? req.body?.type //? ----------------------------- si check es true, coge el valor ya que es válido
-          : playerById.type; //? ---------------------------- si check es false, se queda con lo que tenía ya que el valor introducido no es el correcto del enum
+        const resultEnumType = enumCheck("housingType", req.body?.type); //? checkea si el valor introducido coincide con el enum (enumOk en utils) y devuelve check: true/false
+        resultEnumType.check
+          ? customBody.type = req.body?.type //? ----------------------------- si check es true, coge el valor ya que es válido
+          : customBody.type = roomById.type; //? ---------------------------- si check es false, se queda con lo que tenía ya que el valor introducido no es el correcto del enum
+      }
+
+      //todo ------------ ENUM (location) ------------
+      if (req.body?.publicLocation) {
+        const resultEnumLocation = enumCheck("publicLocation", req.body?.publicLocation); //? checkea si el valor introducido coincide con el enum (enumOk en utils) y devuelve check: true/false
+        resultEnumLocation.check
+          ? customBody.publicLocation = req.body?.publicLocation //? ----------------------------- si check es true, coge el valor ya que es válido
+          : customBody.publicLocation = roomById.publicLocation; //? ---------------------------- si check es false, se queda con lo que tenía ya que el valor introducido no es el correcto del enum
       }
 
       //todo ------------ ENUM (commoditiesHouse) ------------
       if (req.body?.commoditiesHouse) {
-        const resultEnum = enumCheck(
-          commoditiesHouse,
-          req.body?.commoditiesHouse
+        const resultEnumHouse = enumCheck(
+          "commoditiesHome",
+          req.body?.commoditiesHome
         ); //? checkea si el valor introducido coincide con el enum (enumOk en utils) y devuelve check: true/false
-        resultEnum.check
-          ? req.body?.commoditiesHouse //? ----------------------------- si check es true, coge el valor ya que es válido
-          : playerById.commoditiesHouse; //? ---------------------------- si check es false, se queda con lo que tenía ya que el valor introducido no es el correcto del enum
+        resultEnumHouse.check
+          ? customBody.commoditiesHome = req.body?.commoditiesHome //? ----------------------------- si check es true, coge el valor ya que es válido
+          : customBody.commoditiesHome = roomById.commoditiesHome; //? ---------------------------- si check es false, se queda con lo que tenía ya que el valor introducido no es el correcto del enum
       }
 
       //todo ------------ ENUM (commoditiesRoom) ------------
       if (req.body?.commoditiesRoom) {
-        const resultEnum = enumCheck(
-          commoditiesRoom,
+        const resultEnumRoom = enumCheck(
+          "commoditiesRoom",
           req.body?.commoditiesRoom
         ); //? checkea si el valor introducido coincide con el enum (enumOk en utils) y devuelve check: true/false
-        resultEnum.check
-          ? req.body?.commoditiesRoom //? ----------------------------- si check es true, coge el valor ya que es válido
-          : playerById.commoditiesRoom; //? ---------------------------- si check es false, se queda con lo que tenía ya que el valor introducido no es el correcto del enum
+        resultEnumRoom.check
+          ? customBody.commoditiesRoom = req.body?.commoditiesRoom //? ----------------------------- si check es true, coge el valor ya que es válido
+          : customBody.commoditiesRoom = roomById.commoditiesRoom; //? ---------------------------- si check es false, se queda con lo que tenía ya que el valor introducido no es el correcto del enum
       }
 
       try {
+        console.log(customBody)
         await Room.findByIdAndUpdate(id, customBody);
         if (catchImg) {
           // console.log(catchImg) //? consoles para entender qué es cada cosa
@@ -145,12 +155,13 @@ const updateRoom = async (req, res, next) => {
         //!           -------------------
 
         const roomByIdUpdated = await Room.findById(id); //? ---- buscamos el elemento actualizado a través del id
+        console.log("soy el updated room" + roomByIdUpdated)
         const elementUpdate = Object.keys(req.body); //? ----------- buscamos los elementos de la request para saber qué se tiene que actualizar
         let test = []; //? ----------------------------------------- objeto vacío donde meter los tests. estará compuesta de las claves de los elementos y los valores seran true/false segun haya ido bien o mal
 
         elementUpdate.forEach((key) => {
           //? ----------------------------- recorremos las claves de lo que se quiere actualizar
-          if (req.body[key] === roomByIdUpdated[key]) {
+          if (req.body[key] == roomByIdUpdated[key]) {
             //? ---------- si el valor de la clave en la request (el valor actualizado que hemos pedido meter) es el mismo que el que hay ahora en el elemento ---> está bien
             test.push({ [key]: true }); //? ------------------------------------ está bien hecho por lo tanto en el test con la clave comprobada ponemos true --> test aprobado hehe
           } else {
@@ -249,7 +260,7 @@ const deleteRoom = async (req, res, next) => {
 const getById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const roomById = await Room.findById(id).populate(postedBy);
+    const roomById = await Room.findById(id).populate("postedBy");
     return roomById
       ? res.status(200).json(roomById)
       : res.status(404).json("we couldn't find the room");

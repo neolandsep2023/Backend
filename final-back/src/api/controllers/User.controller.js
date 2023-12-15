@@ -865,12 +865,12 @@ const getAll = async (req, res, next) => {
   }
 };
 
-//<!--SEC                                        GET BY ID                                                     ->
+//<!--SEC                                        GET BY ID POPULATED                                                    ->
 //WORKS CORRECTLY
 const getUserById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const userById = await User.findById(id);
+    const userById = await User.findById(id).populate('sentComments receivedComments likedComments savedRooms savedPosts myPosts myRooms myInterests likedPosts postsIAmIn');
     if (userById) {
       return res.status(200).json(userById);
     } else {
@@ -885,6 +885,32 @@ const getUserById = async (req, res, next) => {
     );
   }
 };
+
+//<!--SEC                                        GET BY ID LIKES POPULATED                                                   ->
+//WORKS CORRECTLY
+const getUserByIdLikesPopulated = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userById = await User.findById(id).populate('likedComments savedRooms savedPosts likedPosts');
+    if (userById) {
+      return res.status(200).json(userById);
+    } else {
+      return res.status(404).json("That user doesn't exist.");
+    }
+  } catch (error) {
+    return (
+      res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      }) && next(error)
+    );
+  }
+};
+
+
+
+
+
 
 //<!--SEC                                        GET BY ID                                                     ->
 //WORKS CORRECTLY
@@ -1182,6 +1208,7 @@ module.exports = {
   getAll,
   getUserById,
   getUserByIdPopulated,
+  getUserByIdLikesPopulated,
   getByName,
   getByAge,
   toggleLikedComment,

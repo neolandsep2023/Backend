@@ -21,6 +21,7 @@ const {
   saveRoom,
   toggleLikedComment,
   getUserByIdPopulated,
+  getUserByIdLikesPopulated,
   registerGoogle
 } = require("../controllers/User.controller");
 
@@ -52,6 +53,7 @@ UserRoutes.delete("/deleteUser", [isAuth], deleteUser)
 UserRoutes.get("/getAll", [isAuth], getAll)
 UserRoutes.get("/getById/:id", [isAuth], getUserById)
 UserRoutes.get("/getByIdP/:id", [isAuth], getUserByIdPopulated)
+UserRoutes.get("/getByIdPopulatedLikes/:id", [isAuth], getUserByIdLikesPopulated)
 UserRoutes.get("/byName/name", [isAuth], getByName)
 UserRoutes.get("/byAge/age", [isAuth], getByAge)
 UserRoutes.patch("/likeRoom/:id", [isAuth], toggleLikedComment)

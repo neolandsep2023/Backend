@@ -685,18 +685,14 @@ const updateUser = async (req, res, next) => {
 const deleteUser = async (req, res, next) => {
   if (req.user.googleSignUp == false) {
     try {
-    console.log(req?.user?.password, "password");
     const _id = req?.user?._id;
-    // I could also grab the pass and email through the req.user but I thought it safer this way.
     const dataBaseUser = await User.findById(_id);
-    if (bcrypt.compareSync(req.body.password, req.user.password)) {
-      //le he puesto para que meta su contrasena antes de borrar su usuario :)
       try {
         await User.findByIdAndDelete(req.user?._id);
         deleteImgCloudinary(dataBaseUser.image);
         try {
           try {
-            await Comments.deleteMany({ creator: _id });
+            await Comment.deleteMany({ creator: _id });
             try {
               await Comment.updateMany(
                 { likes: _id },
@@ -715,7 +711,7 @@ const deleteUser = async (req, res, next) => {
                       await Post.updateMany(
                         { likes: _id },
                         { $pull: { likes: _id } }
-                      );
+                      )
                       try {
                       } catch (error) {
                         return res.status(404).json("Error pulling references");
@@ -759,11 +755,6 @@ const deleteUser = async (req, res, next) => {
       } catch (error) {
         return res.status(500).json("Error in delete catch");
       }
-    } else {
-      return res
-        .status(404)
-        .json("Error in input fields, please check spelling and try again.");
-    }
   } catch (error) {
     return (
       res.status(500).json({

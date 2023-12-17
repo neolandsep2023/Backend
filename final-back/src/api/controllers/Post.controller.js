@@ -148,11 +148,12 @@ const getByPostcode = async (req, res, next) => {
   }
 };
 
+
 //! --------------- GET BY PROVINCE ----------------
 const getByProvince = async (req, res, next) => {
   try {
     const { province } = req.params;
-    const postByProvince = await Post.find({ province: province }).populate(
+    const postByProvince = await Post.find({ province: province }).sort({ createdAt: -1 }).populate(
       "author"
     );
     return postByProvince
@@ -407,11 +408,12 @@ const searchPost = async (req, res, next) => {
 //! ----------------  GET BY LOCATION -----------------
 
 const getPostByLocation = async (req, res, next) => {
-  const { location } = req.params;
+  console.log("entroooo", province)
+  const { province } = req.params;
   try {
     const postsByLocation = await Post.find({
-      location: { $in: location },
-    });
+      province: { $in: province },
+    }).sort({ createdAt: -1 });
     return res.status(200).json(postsByLocation);
   } catch (error) {
     return res.status(500).json({
@@ -420,6 +422,7 @@ const getPostByLocation = async (req, res, next) => {
     });
   }
 };
+
 
 //! ---------------- DELETE -----------------
 

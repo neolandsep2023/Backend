@@ -877,6 +877,7 @@ const getUserById = async (req, res, next) => {
   }
 };
 
+
 //<!--SEC                                        GET BY ID LIKES POPULATED                                                   ->
 //WORKS CORRECTLY
 const getUserByIdLikesPopulated = async (req, res, next) => {
@@ -897,7 +898,6 @@ const getUserByIdLikesPopulated = async (req, res, next) => {
     );
   }
 };
-
 
 
 

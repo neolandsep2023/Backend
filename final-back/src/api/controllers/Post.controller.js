@@ -1,6 +1,7 @@
 const Post = require("../models/Post.model");
 const User = require("../models/User.model");
 const Comment = require("../models/Comment.model");
+const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 
 //! ---------------- CREATE -----------------
 
@@ -61,7 +62,7 @@ const createPost = async (req, res) => {
 const getPostByIdPopulate = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const postById = await Post.findById(id).populate("author likes comments"); //? cogemos el elemento (eleven) identificandola a través del id, que es único
+    const postById = await Post.findById(id).populate("author likes comments roommates room"); //? cogemos el elemento (eleven) identificandola a través del id, que es único
     return res
       .status(postById ? 200 : 404)
       .json(postById ? postById : "post not found");
@@ -226,18 +227,23 @@ const updatePost = async (req, res) => {
           image: req.file?.path ? catchImg : postById.image,
           title: req.body?.title ? req.body.title : postById.title,
           text: req.body?.text ? req.body.text : postById.text,
-          location: req.body?.location ? req.body.location : postById.location,
-          postcode: req.body?.postcode ? req.body.postcode : roomById.postcode,
-          province: req.body?.province ? req.body.province : roomById.province,
+          postcode: req.body?.postcode ? req.body.postcode : postById.postcode,
+          province: req.body?.province ? req.body.province : postById.province,
+          price: req.body?.price ? req.body.price : postById.price,
+          price: req.body?.deposit ? req.body.deposit : postById.deposit,
+          price: req.body?.depositPrice ? req.body.depositPrice : postById.depositPrice,
+          room: req.body?.room ? req.body.room : postById.room,
+          roommates: req.body?.roommates ? req.body.roommates : postById.roommates,
           author: postById.author,
           type: postById.type,
           likes: postById.likes,
           comments: postById.comments,
+          saved: postById.saved,
         };
 
         try {
           await Post.findByIdAndUpdate(id, customBody).populate(
-            "author likes comments"
+            "author likes comments roommates"
           );
           if (req.file?.path) {
             deleteImgCloudinary(postById.image);
@@ -248,12 +254,13 @@ const updatePost = async (req, res) => {
           //!           -------------------
 
           const postByIdUpdated = await Post.findById(id);
+          console.log(postByIdUpdated)
           const elementUpdate = Object.keys(req.body);
           let test = [];
 
           elementUpdate.forEach((item) => {
-            if (req.body[item] === postByIdUpdated[item]) {
-              if (req.body[item] != postById[item]) {
+            if (customBody[item] == postByIdUpdated[item]) {
+              if (customBody[item] != postById[item]) {
                 //si no es la misma que la antigua
                 test[item] = true;
               } else {

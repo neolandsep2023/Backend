@@ -215,7 +215,7 @@ const allPostByType = async (req, res, next) => {
 //! ---------------- UPDATE -----------------
 
 const updatePost = async (req, res) => {
-  let catchImg = req.file?.path; //TODO-------- ESTO TIENE QUE SER UN ARRAY DE FOTOS --------
+  let catchImg = req.file?.path; 
   try {
     await Post.syncIndexes();
     const { id } = req.params;
@@ -254,7 +254,8 @@ const updatePost = async (req, res) => {
           //!           -------------------
 
           const postByIdUpdated = await Post.findById(id);
-          console.log(postByIdUpdated)
+          console.log(postByIdUpdated?.roommates)
+          console.log(customBody?.roommates)
           const elementUpdate = Object.keys(req.body);
           let test = [];
 

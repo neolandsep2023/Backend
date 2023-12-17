@@ -12,6 +12,7 @@ const PostSchema = new Schema(
       title: { type: String, required: true, minLength: 10, maxLength: 50},
       text: { type: String, required: true, minLength: 100, maxLength: 600 },
       image: { type: String },
+      publicLocation: {type: String, required: true},
       province: {type: String, required: true},
       postcode: {type: Number, required: true},
       type: { type: String, enum: ['RoomSeeker', 'RoommateSeeker'], required: true },

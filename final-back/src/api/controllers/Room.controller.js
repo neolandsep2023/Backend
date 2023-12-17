@@ -26,7 +26,7 @@ const createRoom = async (req, res, next) => {
     }
 
     const saveRoom = await newRoom.save();
-
+    console.log(saveRoom)
     try {
       await User.findByIdAndUpdate(
         req.user._id,
@@ -45,7 +45,7 @@ const createRoom = async (req, res, next) => {
   } catch (error) {
     if (catchImg) {
       for (let a = 0; a < catchImg.length; a++) {
-        deleteImgCloudinary(catchImg[a]);
+        deleteImgCloudinary(catchImg[a].path);
       }
     }
     return res.status(500).json({

@@ -856,12 +856,12 @@ const getAll = async (req, res, next) => {
   }
 };
 
-//<!--SEC                                        GET BY ID POPULATED                                                    ->
+//<!--SEC                                        GET BY ID NORMAL                                                  ->
 //WORKS CORRECTLY
 const getUserById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const userById = await User.findById(id).populate('sentComments receivedComments likedComments savedRooms savedPosts myPosts myRooms myInterests likedPosts postsIAmIn');
+    const userById = await User.findById(id)
     if (userById) {
       return res.status(200).json(userById);
     } else {
@@ -903,14 +903,13 @@ const getUserByIdLikesPopulated = async (req, res, next) => {
 
 
 
-//<!--SEC                                        GET BY ID                                                     ->
+//<!--SEC                                        GET BY ID  POPULATED                                                   ->
 //WORKS CORRECTLY
 const getUserByIdPopulated = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const userById = await User.findById(id).populate(
-      "sentComments receivedComments likedComments savedRooms savedPosts myPosts myRooms likedPosts"
-    );
+    const userById = await User.findById(id).populate('sentComments receivedComments likedComments savedRooms savedPosts myPosts myRooms myInterests likedPosts postsIAmIn');
+    ;
     if (userById) {
       return res.status(200).json(userById);
     } else {

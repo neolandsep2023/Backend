@@ -23,11 +23,9 @@ const RoomSchema = new Schema(
         "Flat",
       ],
     },
-    available: { type: Boolean, required: true, default: true },
+    available: { type: Boolean, required: true}, //habia un default: true a ver si no falla
     surface: { type: Number, required: true },
     bathrooms: { type: String, required: true, enum: ["0", "1", "2", "3+"] },
-    petsAllowed: { type: Boolean, required: true },
-    exterior: { type: Boolean, required: true },
     roommates: { type: Number, required: true },
     publicLocation: 
       {
@@ -84,6 +82,8 @@ const RoomSchema = new Schema(
           "Shower",
           "Bathtub",
           "Kitchen",
+          "Refrigerator",
+          "Oven Stove",
           "Microwave",
           "Heating",
           "Air Conditioning",

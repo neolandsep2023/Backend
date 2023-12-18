@@ -58,70 +58,77 @@ const createRoom = async (req, res, next) => {
 //! ------------------ UPDATE ------------------
 const updateRoom = async (req, res, next) => {
   await Room.syncIndexes();
-  let catchImg = req.files;
+  let catchImg = req?.files;
+  console.log(req.files)
   try {
     const { id } = req.params;
     const roomById = await Room.findById(id);
     if (roomById) {
       const oldImg = roomById.image;
       const images = [];
-      if (catchImg) {
+      if (catchImg.length > 0) {
         catchImg.map((image) => {
           //? como catchImg (req.files) es un array de objetos, tengo que recorrerlo y de cada objeto quedarme con el path para ser eso lo que meto en la room
           images.push(image.path);
         });
       }
-      console.log(req.body.postcode)
 
       const customBody = {
         _id: roomById._id,
-        image: catchImg ? images : oldImg,
         title: req.body?.title ? req.body.title : roomById.title,
+        image: catchImg.length > 0 ? images : oldImg,
         description: req.body?.description
           ? req.body.description
           : roomById.description,
-        available: req.body?.available
-          ? req.body.available
-          : roomById.available,
         type: roomById.type,
-        publicLocation: roomById.publicLocation,
-        commoditiesHome: roomById.commoditiesHome,
-        commoditiesRoom: roomById.commoditiesRoom,
-        roommates: req.body?.roommates ? req.body.roommates : roomById.roommates,
+        available: req.body?.available
+          ? JSON.parse(req.body.available)
+          : roomById.available,
         surface: req.body?.surface ? req.body.surface : roomById.surface,
         bathrooms: req.body?.bathrooms ? req.body.bathrooms : roomById.bathrooms,
-        postcode: req.body?.postcode ? req.body.postcode : roomById.postcode,
-        province: req.body?.province ? req.body.province : roomById.province,
+        publicLocation: roomById.publicLocation,
+        postcode: roomById.postcode,
+        province: roomById.province,
         petsAllowed: req.body?.petsAllowed
-          ? req.body.petsAllowed
-          : roomById.petsAllowed,
-        exterior: req.body?.exterior ? req.body.exterior : roomById.exterior,
+        ? JSON.parse(req.body.petsAllowed)
+        : roomById.petsAllowed,
+        exterior: req.body?.exterior ? JSON.parse(req.body.exterior) : roomById.exterior,
         roommates: req.body?.roommates ? req.body.roommates : roomById.roommates,
+        commoditiesHome: roomById.commoditiesHome,
+        commoditiesRoom: roomById.commoditiesRoom,
+        postedBy: roomById.postedBy,
+        likes: roomById.postedBy,
+        saved: roomById.saved,
+        comments: roomById.comments,
+        post: roomById.post,
       };
 
-      //todo ------------ ENUM (type) ------------
-      if (req.body?.type) {
-        const resultEnumType = enumCheck("housingType", req.body?.type); //? checkea si el valor introducido coincide con el enum (enumOk en utils) y devuelve check: true/false
-        resultEnumType.check
-          ? customBody.type = req.body?.type //? ----------------------------- si check es true, coge el valor ya que es válido
-          : customBody.type = roomById.type; //? ---------------------------- si check es false, se queda con lo que tenía ya que el valor introducido no es el correcto del enum
-      }
 
-      //todo ------------ ENUM (location) ------------
-      if (req.body?.publicLocation) {
-        const resultEnumLocation = enumCheck("publicLocation", req.body?.publicLocation); //? checkea si el valor introducido coincide con el enum (enumOk en utils) y devuelve check: true/false
-        resultEnumLocation.check
-          ? customBody.publicLocation = req.body?.publicLocation //? ----------------------------- si check es true, coge el valor ya que es válido
-          : customBody.publicLocation = roomById.publicLocation; //? ---------------------------- si check es false, se queda con lo que tenía ya que el valor introducido no es el correcto del enum
-      }
+
+      // //todo ------------ ENUM (type) ------------
+      // if (req.body?.type) {
+      //   const resultEnumType = enumCheck("housingType", req.body?.type); //? checkea si el valor introducido coincide con el enum (enumOk en utils) y devuelve check: true/false
+      //   resultEnumType.check
+      //     ? customBody.type = req.body?.type //? ----------------------------- si check es true, coge el valor ya que es válido
+      //     : customBody.type = roomById.type; //? ---------------------------- si check es false, se queda con lo que tenía ya que el valor introducido no es el correcto del enum
+      // }
+
+      // //todo ------------ ENUM (location) ------------
+      // if (req.body?.publicLocation) {
+      //   const resultEnumLocation = enumCheck("publicLocation", req.body?.publicLocation); //? checkea si el valor introducido coincide con el enum (enumOk en utils) y devuelve check: true/false
+      //   resultEnumLocation.check
+      //     ? customBody.publicLocation = req.body?.publicLocation //? ----------------------------- si check es true, coge el valor ya que es válido
+      //     : customBody.publicLocation = roomById.publicLocation; //? ---------------------------- si check es false, se queda con lo que tenía ya que el valor introducido no es el correcto del enum
+      // }
 
       //todo ------------ ENUM (commoditiesHouse) ------------
-      if (req.body?.commoditiesHouse) {
-        const resultEnumHouse = enumCheck(
+      if (req.body?.commoditiesHome) {
+        const resultEnumHome = enumCheck(
           "commoditiesHome",
           req.body?.commoditiesHome
         ); //? checkea si el valor introducido coincide con el enum (enumOk en utils) y devuelve check: true/false
-        resultEnumHouse.check
+        console.log("check1", resultEnumHome)
+        resultEnumHome.check
           ? customBody.commoditiesHome = req.body?.commoditiesHome //? ----------------------------- si check es true, coge el valor ya que es válido
           : customBody.commoditiesHome = roomById.commoditiesHome; //? ---------------------------- si check es false, se queda con lo que tenía ya que el valor introducido no es el correcto del enum
       }
@@ -132,6 +139,7 @@ const updateRoom = async (req, res, next) => {
           "commoditiesRoom",
           req.body?.commoditiesRoom
         ); //? checkea si el valor introducido coincide con el enum (enumOk en utils) y devuelve check: true/false
+        console.log("check2", resultEnumRoom)
         resultEnumRoom.check
           ? customBody.commoditiesRoom = req.body?.commoditiesRoom //? ----------------------------- si check es true, coge el valor ya que es válido
           : customBody.commoditiesRoom = roomById.commoditiesRoom; //? ---------------------------- si check es false, se queda con lo que tenía ya que el valor introducido no es el correcto del enum
@@ -140,7 +148,7 @@ const updateRoom = async (req, res, next) => {
       try {
         console.log(customBody)
         await Room.findByIdAndUpdate(id, customBody);
-        if (catchImg) {
+        if (catchImg.length > 0) {
           // console.log(catchImg) //? consoles para entender qué es cada cosa
           // console.log(oldImg)
           // console.log(images)
@@ -157,9 +165,16 @@ const updateRoom = async (req, res, next) => {
         const elementUpdate = Object.keys(req.body); //? ----------- buscamos los elementos de la request para saber qué se tiene que actualizar
         let test = []; //? ----------------------------------------- objeto vacío donde meter los tests. estará compuesta de las claves de los elementos y los valores seran true/false segun haya ido bien o mal
 
+        console.log(typeof(customBody.petsAllowed), typeof(roomByIdUpdated.petsAllowed), customBody.petsAllowed, roomByIdUpdated.petsAllowed)
+        console.log(typeof(customBody.exterior), typeof(roomByIdUpdated.exterior), customBody.exterior, roomByIdUpdated.exterior)
+        console.log(typeof(customBody.available), typeof(roomByIdUpdated.available), customBody.available, roomByIdUpdated.available)
+
+
         elementUpdate.forEach((key) => {
+          console.log("update", req.body, roomByIdUpdated)
+          console.log("keyss", req.body[key], roomByIdUpdated[key])
           //? ----------------------------- recorremos las claves de lo que se quiere actualizar
-          if (req.body[key] == roomByIdUpdated[key]) {
+          if (customBody[key] == roomByIdUpdated[key]) {
             //? ---------- si el valor de la clave en la request (el valor actualizado que hemos pedido meter) es el mismo que el que hay ahora en el elemento ---> está bien
             test.push({ [key]: true }); //? ------------------------------------ está bien hecho por lo tanto en el test con la clave comprobada ponemos true --> test aprobado hehe
           } else {
@@ -167,16 +182,16 @@ const updateRoom = async (req, res, next) => {
           }
         });
 
-        if (catchImg) {
-          roomByIdUpdated.image = catchImg //? ---------------- si la imagen en la request es la misma que la que hay ahora en el elemento
-            ? (test = { ...test, file: true }) //? ------------- hacemos una copia de test y le decimos que en file (foto) es true, ha ido bien
-            : (test = { ...test, file: false }); //? ------------ hacemos una copia de test y le decimos que en file (foto) es false, ha ido mal
+        if (catchImg.length > 0) {
+          roomByIdUpdated.image == catchImg //? ---------------- si la imagen en la request es la misma que la que hay ahora en el elemento
+            ? test.push({ "file": true }) //? ------------- hacemos una copia de test y le decimos que en file (foto) es true, ha ido bien
+            : test.push({ "file": false }); //? ------------ hacemos una copia de test y le decimos que en file (foto) es false, ha ido mal
         }
 
         let acc = 0;
         for (let clave in test) {
           //? -------------------- recorremos tests
-          test[clave] == false ? acc++ : null; //? - si el valor es false es que algo ha fallado y le sumamos al contador de fallos
+          test[clave] == false && acc++; //? - si el valor es false es que algo ha fallado y le sumamos al contador de fallos
         }
 
         if (acc > 0) {
@@ -488,3 +503,169 @@ module.exports = {
   getByProvince,
   getByPostcode,
 };
+
+/***
+ * /**
+ * //! ------------------ UPDATE ------------------
+const updateRoom = async (req, res, next) => {
+  await Room.syncIndexes();
+  let catchImg = req?.files;
+  try {
+    const { id } = req.params;
+    const roomById = await Room.findById(id);
+    if (roomById) {
+      const oldImg = roomById.image;
+      const images = [];
+      if (catchImg.length > 0) {
+        catchImg.map((image) => {
+          //? como catchImg (req.files) es un array de objetos, tengo que recorrerlo y de cada objeto quedarme con el path para ser eso lo que meto en la room
+          images.push(image.path);
+        });
+      }
+      console.log(req.body.postcode);
+
+      const customBody = {
+        _id: roomById._id,
+        image: catchImg.length > 0 ? images : oldImg,
+        title: req.body?.title ? req.body.title : roomById.title,
+        description: req.body?.description
+          ? req.body.description
+          : roomById.description,
+        type: roomById.type,
+        available: req.body?.available
+          ? JSON.parse(req.body.available)
+          : roomById.available,
+        surface: req.body?.surface ? req.body.surface : roomById.surface,
+        bathrooms: req.body?.bathrooms
+          ? req.body.bathrooms
+          : roomById.bathrooms,
+          petsAllowed: req.body?.petsAllowed
+          ? JSON.parse(req.body.petsAllowed)
+          : roomById.petsAllowed,
+        exterior: req.body?.exterior
+          ? JSON.parse(req.body.exterior)
+          : roomById.exterior,
+        roommates: req.body?.roommates
+          ? req.body.roommates
+          : roomById.roommates,
+        publicLocation: roomById.publicLocation,
+        province: roomById.province,
+        postcode: roomById.postcode,
+
+        commoditiesHome: req.body?.commoditiesHome
+        ? req.body.commoditiesHome
+        : roomById.commoditiesHome,
+        commoditiesRoom: req.body?.commoditiesRoom
+        ? req.body.commoditiesRoom
+        : roomById.commoditiesRoom,
+        roommates: req.body?.roommates
+          ? req.body.roommates
+          : roomById.roommates,
+
+      
+      };
+      // console.log("bodyadiadiadi", customBody);
+
+      // if (req.body?.interests) {
+      //   const { interests } = req.body;   //! ES UN ARRAY
+      //   let enumResult = enumCheck("interests", interests);
+      //   console.log(enumResult, 'Enum result');
+      //   patchedUser.interests = enumResult.check
+      //     ? interests
+      //     : req.user.interests;
+      // }
+
+
+      // //todo ------------ ENUM (commoditiesHouse) ------------
+      // if (req.body?.commoditiesHouse) {
+      //   const resultEnumHouse = enumCheck(
+      //     "commoditiesHome",
+      //     req.body?.commoditiesHome
+      //   ); //? checkea si el valor introducido coincide con el enum (enumOk en utils) y devuelve check: true/false
+      //   console.log(resultEnumHouse)
+        
+      //   resultEnumHouse.check
+      //     ? (customBody.commoditiesHome = req.body?.commoditiesHome) //? ----------------------------- si check es true, coge el valor ya que es válido
+      //     : (customBody.commoditiesHome = roomById.commoditiesHome); //? ---------------------------- si check es false, se queda con lo que tenía ya que el valor introducido no es el correcto del enum
+      // }
+
+      // //todo ------------ ENUM (commoditiesRoom) ------------
+      // if (req.body?.commoditiesRoom) {
+      //   const resultEnumRoom = enumCheck(
+      //     "commoditiesRoom",
+      //     req.body?.commoditiesRoom
+      //   ); //? checkea si el valor introducido coincide con el enum (enumOk en utils) y devuelve check: true/false
+      //   console.log(resultEnumRoom)
+        
+      //   resultEnumRoom.check
+      //     ? (customBody.commoditiesRoom = req.body?.commoditiesRoom) //? ----------------------------- si check es true, coge el valor ya que es válido
+      //     : (customBody.commoditiesRoom = roomById.commoditiesRoom); //? ---------------------------- si check es false, se queda con lo que tenía ya que el valor introducido no es el correcto del enum
+      // }
+
+      try {
+        console.log(customBody);
+        await Room.findByIdAndUpdate(id, customBody);
+        if (catchImg) {
+          for (let a = 0; a < oldImg.length; a++) {
+            deleteImgCloudinary(oldImg[a]);
+          }
+        }
+
+
+//TEEEEEEEEEEEEESTTTTTTTTTTTTTTTTTTTTTIIIIIIIIIIIIIIIIIIIIIIIIINNNNNNNNNNNNNNNNNNG
+        const roomByIdUpdated = await Room.findById(id);
+        console.log("soy el updated room" + roomByIdUpdated);
+        const elementUpdate = Object.keys(req.body);
+        let test = []; 
+
+        elementUpdate.forEach((key) => {
+          //? ----------------------------- recorremos las claves de lo que se quiere actualizar
+          if (req.body[key] === roomByIdUpdated[key]) {
+            test.push({ [key]: true }); 
+          } else {
+            test.push({ [key]: false });
+          }
+        });
+
+        if (catchImg) {
+          roomByIdUpdated.image = catchImg 
+            ? test.push({ 'file': true }) 
+            : test.push({ 'file': false });
+        }
+
+        let acc = 0;
+        for (let clave in test) {
+          test[clave] == false && acc++ ;
+        }
+
+        if (acc > 0) {
+          //? --------------------- si acc 1 o más, es que ha habido uno o más errores, y por lo tanto hay que notificarlo
+          return res.status(404).json({
+            dataTest: test, //? ------------ por aquí podremos examinar los errores viendo en qué claves se han producido
+            update: false,
+          });
+        } else {
+          return res.status(200).json({
+            dataTest: test,
+            update: true,
+            updatedRoom: roomByIdUpdated,
+          });
+        }
+      } catch (error) {
+        return res.status(404).json({
+          message: "there was an error saving the room",
+          error: error.message,
+        });
+      }
+    } else {
+      return res.status(404).json("no matching room");
+    }
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error en el catch",
+      message: error.message,
+    });
+  }
+};
+
+ */

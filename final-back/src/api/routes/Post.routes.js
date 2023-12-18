@@ -15,6 +15,7 @@ const {
   searchPost,
   getByPostcode,
   getByProvince,
+  toggleRoommates
 } = require("../controllers/Post.controller");
 
 const PostRoutes = require("express").Router();
@@ -37,6 +38,7 @@ PostRoutes.patch(
   [isPostOwner],
   updatePost
 );
+PostRoutes.patch("/toggleRoommates/:id", toggleRoommates);
 PostRoutes.delete("/:id", [isPostOwner], deletePost);
 
 module.exports = PostRoutes;

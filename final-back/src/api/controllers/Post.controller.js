@@ -319,6 +319,63 @@ const updatePost = async (req, res) => {
   }
 };
 
+//! ---------------- TOGGLE ROOMMATES -------------
+const toggleRoommates = async (req, res) => {
+  console.log("entro en toggle")
+ try {
+  const { id } = req.params;
+  const { roommates } = req.body;
+  const postById = await Post.findById(id);
+  if (postById) {
+    const arrayIdRoommates = roommates.split(",");
+
+    Promise.all([
+      arrayIdRoommates.forEach(async (roommate) => {
+        if (postById.roommates.includes(roommate)) {
+          try {
+            await Post.findByIdAndUpdate(id, {
+              $pull: {roommates: roommate},
+            })
+            try {
+              await User.findByIdAndUpdate(roommate, {
+                $pull: {myPosts: id}
+              })
+            } catch (error) {
+              return res.status(404).json({message: "Error al quitar el post del user", error: error.message})
+            }
+          } catch (error) {
+            return res.status(404).json({message: "Error al quitar el user del post", error: error.message})
+          }
+        } else {
+          try {
+            await Post.findByIdAndUpdate(id, {
+              $push: {roommates: roommate},
+            })
+            try {
+              await User.findByIdAndUpdate(roommate, {
+                $push: {myPosts: id}
+              })
+            } catch (error) {
+              return res.status(404).json({message: "Error al añadir el post al user", error: error.message})
+            }
+          } catch (error) {
+            return res.status(404).json({message: "Error al añadir el user al post", error: error.message})
+          }
+        }
+      }),
+    ]).then(async () => {
+      return res.status(200).json({
+        dataUpdate: await Post.findById(id).populate("author room roommates likes saved comments")
+      })
+    })
+  } else {
+    return res.status(404).json("este post no existe")
+  }
+ } catch (error) {
+  return res.status(500).json({message: "Error general en el catch", error: error.message})
+ }
+};
+
 //! ---------------- SEARCH -----------------
 
 const searchPost = async (req, res, next) => {
@@ -483,4 +540,5 @@ module.exports = {
   searchPost,
   getByPostcode,
   getByProvince,
+  toggleRoommates,
 };

@@ -5,7 +5,7 @@ const User = require("../models/User.model");
 
 //! ------------------ CREATE ------------------
 const createRoom = async (req, res, next) => {
-  let catchImg = req?.files ;
+  let catchImg = req?.files;
   console.log("soy req.files", req.files);
   console.log("soy req.user", req.user);
 
@@ -22,16 +22,17 @@ const createRoom = async (req, res, next) => {
         console.log("hola");
       });
     } else {
-      newRoom.image = ["https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-15.png"];
+      newRoom.image = [
+        "https://www.freeiconspng.com/thumbs/no-image-icon/no-image-icon-15.png",
+      ];
     }
 
     const saveRoom = await newRoom.save();
-    console.log(saveRoom)
+    console.log(saveRoom);
     try {
-      await User.findByIdAndUpdate(
-        req.user._id,
-        { $push: { myRooms: saveRoom._id } }
-      );
+      await User.findByIdAndUpdate(req.user._id, {
+        $push: { myRooms: saveRoom._id },
+      });
 
       console.log(saveRoom, "saveRoom");
       return res.status(200).json(saveRoom);
@@ -59,7 +60,7 @@ const createRoom = async (req, res, next) => {
 const updateRoom = async (req, res, next) => {
   await Room.syncIndexes();
   let catchImg = req?.files;
-  console.log(req.files)
+  console.log(req.files);
   try {
     const { id } = req.params;
     const roomById = await Room.findById(id);
@@ -85,15 +86,21 @@ const updateRoom = async (req, res, next) => {
           ? JSON.parse(req.body.available)
           : roomById.available,
         surface: req.body?.surface ? req.body.surface : roomById.surface,
-        bathrooms: req.body?.bathrooms ? req.body.bathrooms : roomById.bathrooms,
+        bathrooms: req.body?.bathrooms
+          ? req.body.bathrooms
+          : roomById.bathrooms,
         publicLocation: roomById.publicLocation,
         postcode: roomById.postcode,
         province: roomById.province,
         petsAllowed: req.body?.petsAllowed
-        ? JSON.parse(req.body.petsAllowed)
-        : roomById.petsAllowed,
-        exterior: req.body?.exterior ? JSON.parse(req.body.exterior) : roomById.exterior,
-        roommates: req.body?.roommates ? req.body.roommates : roomById.roommates,
+          ? JSON.parse(req.body.petsAllowed)
+          : roomById.petsAllowed,
+        exterior: req.body?.exterior
+          ? JSON.parse(req.body.exterior)
+          : roomById.exterior,
+        roommates: req.body?.roommates
+          ? req.body.roommates
+          : roomById.roommates,
         commoditiesHome: roomById.commoditiesHome,
         commoditiesRoom: roomById.commoditiesRoom,
         postedBy: roomById.postedBy,
@@ -102,8 +109,6 @@ const updateRoom = async (req, res, next) => {
         comments: roomById.comments,
         post: roomById.post,
       };
-
-
 
       // //todo ------------ ENUM (type) ------------
       // if (req.body?.type) {
@@ -127,10 +132,10 @@ const updateRoom = async (req, res, next) => {
           "commoditiesHome",
           req.body?.commoditiesHome
         ); //? checkea si el valor introducido coincide con el enum (enumOk en utils) y devuelve check: true/false
-        console.log("check1", resultEnumHome)
+        console.log("check1", resultEnumHome);
         resultEnumHome.check
-          ? customBody.commoditiesHome = req.body?.commoditiesHome //? ----------------------------- si check es true, coge el valor ya que es válido
-          : customBody.commoditiesHome = roomById.commoditiesHome; //? ---------------------------- si check es false, se queda con lo que tenía ya que el valor introducido no es el correcto del enum
+          ? (customBody.commoditiesHome = req.body?.commoditiesHome) //? ----------------------------- si check es true, coge el valor ya que es válido
+          : (customBody.commoditiesHome = roomById.commoditiesHome); //? ---------------------------- si check es false, se queda con lo que tenía ya que el valor introducido no es el correcto del enum
       }
 
       //todo ------------ ENUM (commoditiesRoom) ------------
@@ -139,14 +144,14 @@ const updateRoom = async (req, res, next) => {
           "commoditiesRoom",
           req.body?.commoditiesRoom
         ); //? checkea si el valor introducido coincide con el enum (enumOk en utils) y devuelve check: true/false
-        console.log("check2", resultEnumRoom)
+        console.log("check2", resultEnumRoom);
         resultEnumRoom.check
-          ? customBody.commoditiesRoom = req.body?.commoditiesRoom //? ----------------------------- si check es true, coge el valor ya que es válido
-          : customBody.commoditiesRoom = roomById.commoditiesRoom; //? ---------------------------- si check es false, se queda con lo que tenía ya que el valor introducido no es el correcto del enum
+          ? (customBody.commoditiesRoom = req.body?.commoditiesRoom) //? ----------------------------- si check es true, coge el valor ya que es válido
+          : (customBody.commoditiesRoom = roomById.commoditiesRoom); //? ---------------------------- si check es false, se queda con lo que tenía ya que el valor introducido no es el correcto del enum
       }
 
       try {
-        console.log(customBody)
+        console.log(customBody);
         await Room.findByIdAndUpdate(id, customBody);
         if (catchImg.length > 0) {
           // console.log(catchImg) //? consoles para entender qué es cada cosa
@@ -161,31 +166,33 @@ const updateRoom = async (req, res, next) => {
         //!           -------------------
 
         const roomByIdUpdated = await Room.findById(id); //? ---- buscamos el elemento actualizado a través del id
-        console.log("soy el updated room" + roomByIdUpdated)
+        console.log("soy el updated room" + roomByIdUpdated);
         const elementUpdate = Object.keys(req.body); //? ----------- buscamos los elementos de la request para saber qué se tiene que actualizar
         let test = []; //? ----------------------------------------- objeto vacío donde meter los tests. estará compuesta de las claves de los elementos y los valores seran true/false segun haya ido bien o mal
 
-        console.log(typeof(customBody.petsAllowed), typeof(roomByIdUpdated.petsAllowed), customBody.petsAllowed, roomByIdUpdated.petsAllowed)
-        console.log(typeof(customBody.exterior), typeof(roomByIdUpdated.exterior), customBody.exterior, roomByIdUpdated.exterior)
-        console.log(typeof(customBody.available), typeof(roomByIdUpdated.available), customBody.available, roomByIdUpdated.available)
-
-
         elementUpdate.forEach((key) => {
-          console.log("update", req.body, roomByIdUpdated)
-          console.log("keyss", req.body[key], roomByIdUpdated[key])
-          //? ----------------------------- recorremos las claves de lo que se quiere actualizar
-          if (customBody[key] == roomByIdUpdated[key]) {
-            //? ---------- si el valor de la clave en la request (el valor actualizado que hemos pedido meter) es el mismo que el que hay ahora en el elemento ---> está bien
-            test.push({ [key]: true }); //? ------------------------------------ está bien hecho por lo tanto en el test con la clave comprobada ponemos true --> test aprobado hehe
+          if (key !== "commoditiesHome" && key !== "commoditiesRoom") {
+            console.log("key", key);
+            //? ----------------------------- recorremos las claves de lo que se quiere actualizar
+            if (customBody[key] == roomByIdUpdated[key]) {
+              //? ---------- si el valor de la clave en la request (el valor actualizado que hemos pedido meter) es el mismo que el que hay ahora en el elemento ---> está bien
+              test.push({ [key]: true }); //? ------------------------------------ está bien hecho por lo tanto en el test con la clave comprobada ponemos true --> test aprobado hehe
+            } else {
+              test.push({ [key]: false }); //? ----------------------------------- algo ha fallado y por lo tanto el test está suspendido (false)
+            }
           } else {
-            test.push({ [key]: false }); //? ----------------------------------- algo ha fallado y por lo tanto el test está suspendido (false)
+            let customBodyArrayToString = customBody[key].join(", ");
+            let updatedArrayToString = roomByIdUpdated[key].join(", ");
+            customBodyArrayToString === updatedArrayToString
+              ? test.push({ [key]: true })
+              : test.push({ [key]: false });
           }
         });
 
         if (catchImg.length > 0) {
           roomByIdUpdated.image == catchImg //? ---------------- si la imagen en la request es la misma que la que hay ahora en el elemento
-            ? test.push({ "file": true }) //? ------------- hacemos una copia de test y le decimos que en file (foto) es true, ha ido bien
-            : test.push({ "file": false }); //? ------------ hacemos una copia de test y le decimos que en file (foto) es false, ha ido mal
+            ? test.push({ file: true }) //? ------------- hacemos una copia de test y le decimos que en file (foto) es true, ha ido bien
+            : test.push({ file: false }); //? ------------ hacemos una copia de test y le decimos que en file (foto) es false, ha ido mal
         }
 
         let acc = 0;
@@ -201,6 +208,7 @@ const updateRoom = async (req, res, next) => {
             update: false,
           });
         } else {
+          console.log("chachi");
           return res.status(200).json({
             dataTest: test,
             update: true,
@@ -343,9 +351,9 @@ const getByPostcode = async (req, res, next) => {
 const getByProvince = async (req, res, next) => {
   try {
     const { province } = req.params;
-    const roomByProvince = await Room.find({ province: { $regex: province, $options: "i" } }).populate(
-      "postedBy"
-    );
+    const roomByProvince = await Room.find({
+      province: { $regex: province, $options: "i" },
+    }).populate("postedBy");
     return roomByProvince.length > 0
       ? res.status(200).json(roomByProvince)
       : res.status(404).json("we couldn't find any rooms");

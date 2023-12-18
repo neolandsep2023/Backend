@@ -932,7 +932,7 @@ const getByName = async (req, res, next) => {
   //es para name y para userName!!
   try {
     console.log(req.body);
-    let { name } = req.body;
+    let { name } = req.params;
 
     console.log(name);
     const UsersByName = await User.find({

@@ -326,8 +326,7 @@ const updatePost = async (req, res) => {
 const toggleRoommates = async (req, res) => {
   console.log("entro en toggle")
  try {
-  const { id } = req.params;
-  const { roommates } = req.body;
+  const { id, roommates } = req.params;
   const postById = await Post.findById(id);
   if (postById) {
     const arrayIdRoommates = roommates.split(",");

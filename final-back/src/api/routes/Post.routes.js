@@ -38,7 +38,7 @@ PostRoutes.patch(
   [isPostOwner],
   updatePost
 );
-PostRoutes.patch("/toggleRoommates/:id", toggleRoommates);
+PostRoutes.patch("/toggleRoommates/:id/:roommates", toggleRoommates);
 PostRoutes.delete("/:id", [isPostOwner], deletePost);
 
 module.exports = PostRoutes;

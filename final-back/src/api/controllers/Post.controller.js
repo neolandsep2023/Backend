@@ -304,14 +304,14 @@ const updatePost = async (req, res) => {
           }
         } catch (error) {
           return res.status(404).json({
-            error: "Error al encontrar al id",
+            error: "Error al actualizar por id",
             message: error.message,
           });
         }
       }
     } catch (error) {
-      return res.status(500).json({
-        error: "Error en el catch",
+      return res.status(404).json({
+        error: "Error encontrando el post",
         message: error.message,
       });
     }

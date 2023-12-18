@@ -367,7 +367,7 @@ const toggleRoommates = async (req, res) => {
       }),
     ]).then(async () => {
       return res.status(200).json({
-        dataUpdate: await Post.findById(id).populate("author room roommates likes saved comments")
+        dataUpdate: await Post.findById(id).populate("author room likes saved comments") //? falta roomates que lo he quitado para poder ver si el user se ha añadido y renderizar cietas cosas si si o si no
       })
     })
   } else {

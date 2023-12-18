@@ -213,6 +213,8 @@ const allPostByType = async (req, res, next) => {
 
 
 
+
+
 //! ---------------- UPDATE -----------------
 
 const updatePost = async (req, res) => {
@@ -228,19 +230,23 @@ const updatePost = async (req, res) => {
           image: req.file?.path ? catchImg : postById.image,
           title: req.body?.title ? req.body.title : postById.title,
           text: req.body?.text ? req.body.text : postById.text,
-          postcode: req.body?.postcode ? req.body.postcode : postById.postcode,
-          province: req.body?.province ? req.body.province : postById.province,
-          price: req.body?.price ? req.body.price : postById.price,
-          price: req.body?.deposit ? req.body.deposit : postById.deposit,
-          price: req.body?.depositPrice ? req.body.depositPrice : postById.depositPrice,
+          type: postById.type,
+          preferredGender: req.body?.preferredGender ? req.body.preferredGender : postById.preferredGender,
+          preferredAge: req.body?.preferredAge ? req.body.preferredAge : postById.preferredAge,
+          postcode: postById.postcode,
+          province: postById.province,
+          price: req.body?.price ? parseInt(req.body.price) : postById.price,
+          deposit: req.body?.deposit ? JSON.parse(req.body.deposit) : postById.deposit,
+          depositPrice: req.body?.depositPrice ? parseInt(req.body.depositPrice) : postById.depositPrice,
+          author: postById.author,
           room: req.body?.room ? req.body.room : postById.room,
           roommates: req.body?.roommates ? req.body.roommates : postById.roommates,
-          author: postById.author,
-          type: postById.type,
           likes: postById.likes,
           comments: postById.comments,
           saved: postById.saved,
         };
+        console.log("customBody", customBody)
+
 
         try {
           await Post.findByIdAndUpdate(id, customBody).populate(
@@ -255,15 +261,17 @@ const updatePost = async (req, res) => {
           //!           -------------------
 
           const postByIdUpdated = await Post.findById(id);
-          console.log(postByIdUpdated?.roommates)
-          console.log(customBody?.roommates)
+          console.log(postByIdUpdated.deposit, typeof(postByIdUpdated.deposit))
+          console.log(customBody.deposit, typeof(customBody.deposit))
+  
           const elementUpdate = Object.keys(req.body);
-          let test = [];
+          let test = {};
 
           elementUpdate.forEach((item) => {
-            if (customBody[item] == postByIdUpdated[item]) {
-              if (customBody[item] != postById[item]) {
-                //si no es la misma que la antigua
+            // Use strict equality (===) for comparison
+            if (customBody[item] === postByIdUpdated[item]) {
+              if (customBody[item] !== postById[item]) {
+                // If not the same as the old value
                 test[item] = true;
               } else {
                 test[item] = "same old info";
@@ -272,19 +280,15 @@ const updatePost = async (req, res) => {
               test[item] = false;
             }
           });
-          //si la imagen existe, añade al objeto del test
+
+          // If the image exists, add it to the test object
           if (catchImg) {
-            postByIdUpdated.image === catchImg
-              ? (test = { ...test, file: true })
-              : (test = { ...test, file: false });
+            test.file = postByIdUpdated.image === catchImg;
           }
 
-          // si hay un false en algunos de esos test vamos a localizar el error
+          // Count the number of false values in the test object
+          const acc = Object.values(test).filter((value) => value === false).length;
 
-          let acc = 0;
-          for (let clave in test) {
-            test[clave] == false && acc++;
-          }
           if (acc > 0) {
             return res.status(404).json({
               postByIdUpdated,
@@ -318,7 +322,6 @@ const updatePost = async (req, res) => {
     });
   }
 };
-
 //! ---------------- TOGGLE ROOMMATES -------------
 const toggleRoommates = async (req, res) => {
   console.log("entro en toggle")

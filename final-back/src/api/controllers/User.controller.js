@@ -1008,18 +1008,19 @@ const getByAge = async (req, res, next) => {
 
 //<!--SEC                                        TOGGLE LIKE                                                     ->
 const toggleLikedPost = async (req, res, next) => {
+  console.log("entro en mi nabo")
   try {
     console.log("body y user", req.body, req.user);
     const { id } = req.params;
-    const { _id, likedPosts } = req.user;
-    if (likedPosts.includes(id)) {
+    const { _id, savedPosts } = req.user;
+    if (savedPosts?.includes(id)) {
       try {
         await User.findByIdAndUpdate(_id, {
-          $pull: { likedPosts: id },
+          $pull: { savedPosts: id },
         });
         try {
           await Post.findByIdAndUpdate(id, {
-            $pull: { likes: _id },
+            $pull: { liked: _id },
           });
           return res.status(200).json({
             user: await User.findById(_id),
@@ -1034,11 +1035,11 @@ const toggleLikedPost = async (req, res, next) => {
     } else {
       try {
         await User.findByIdAndUpdate(_id, {
-          $push: { likedPosts: id },
+          $push: { savedPosts: id },
         });
         try {
           await Post.findByIdAndUpdate(id, {
-            $push: { likes: _id },
+            $push: { liked: _id },
           });
           return res.status(200).json({
             user: await User.findById(_id),
@@ -1051,7 +1052,7 @@ const toggleLikedPost = async (req, res, next) => {
           });
         }
       } catch (error) {
-        return res.status(404).json("Error in pushing post to likedPosts.");
+        return res.status(404).json("Error in pushing post to savedPosts.");
       }
     }
   } catch (error) {

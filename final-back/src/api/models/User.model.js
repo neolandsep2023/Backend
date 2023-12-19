@@ -82,18 +82,11 @@ const UserSchema = new mongoose.Schema(
     receivedComments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
     likedComments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
     savedRooms: [{type: mongoose.Schema.Types.ObjectId, ref: "Room"}],
-
     savedPosts: [{type: mongoose.Schema.Types.ObjectId, ref: "Post"}],
-
     chats: [{ type: mongoose.Schema.Types.ObjectId, ref: "Chat"}], 
-    //esto son chats que tienen comentarios por otro usuario pusheado a ese mongobjeto, y comentarios
-    //pusheados al mismo mongoChat del usuario loggeado
-    // privateComments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
     myPosts: [{type: mongoose.Schema.Types.ObjectId, ref: "Post"}],
     myRooms: [{type: mongoose.Schema.Types.ObjectId, ref: "Room"}],
     myInterests: [{type: mongoose.Schema.Types.ObjectId, ref: "Post"}],
-    likedPosts: [{type: mongoose.Schema.Types.ObjectId, ref: "Post"}],
-    // iLiveIn: [{type: mongoose.Schema.Types.ObjectId, ref: "Room"}],
     postsIAmIn: [{type: mongoose.Schema.Types.ObjectId, ref: "Post"}],
 
   },

@@ -1,6 +1,7 @@
 
+const Comment = require('../models/Comment.model');
 const User = require('../models/User.model');
-const Comment = require('../models/comment.model');
+
 //! ---------------- CREATE COMMENT -----------------
 
 //!!En commented guardo un array de los id de los comentarios que te han puesto.

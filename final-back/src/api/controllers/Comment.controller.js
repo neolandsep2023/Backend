@@ -150,6 +150,7 @@ const createUserReview = async (req, res, next) => {
       textComment: req.body.textComment,
       creator: req.user._id,
       type: "public",
+      rating:req.body.rating,
       commentedUser: req.params.id,
       creatorName:req.user.username,
       creatorImage:req.user.image

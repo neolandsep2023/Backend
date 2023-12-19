@@ -105,19 +105,16 @@ const newComment = async (req, res, next) => {
                   return res.status(200).json({
                     didChatExist: true,
                     newComment: await Comment.findById(savedComment._id),
-                    chatUpdate: await Chat.findById(
+                    chat: await Chat.findById(
                       chatExistOne ? chatExistOne._id : chatExistTwo._id
-                    ).populate({
-                      path: "chats",
-                      populate: [
-                        { path: "userOne", model: User },
-                        { path: "userTwo", model: User },
-                        { path: "comments", model: Comment, populate: "commentedUser creator" },
-                      ],
-                    }),
+                    ).populate([
+                      { path: "userOne", model: User },
+                      { path: "userTwo", model: User },
+                      { path: "comments", model: Comment, populate: "commentedUser creator" },
+                    ])
                   });
                 } catch (error) {
-                  return res.status(404).json("Error updating existing chat.");
+                  return res.status(404).json(error.message);
                 }
               }
             } catch (error) {
@@ -153,6 +150,26 @@ const newComment = async (req, res, next) => {
   }
 };
 
+//! --------------- GET by ID  POPULATED!!! ----------------
+const getChatByIdPopulate = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const chatById = await Chat.findById(id).populate([
+      { path: "userOne", model: User },
+      { path: "userTwo", model: User },
+      { path: "comments", model: Comment, populate: "commentedUser creator" },
+    ]);
+    return res
+      .status(chatById ? 200 : 404)
+      .json(chatById ? chatById : "post not found");
+  } catch (error) {
+    return res.status(500).json({
+      error: "Error en el catch",
+      message: error.message,
+    });
+  }
+};
+
 //aqui hacemos un populado de un populado. Cogemos user y populamos chats,
 //y a su vez, populamos lo que hay dentro de chats. Path es como se llama la clave que vamos a popular, y model
 //al modelo que pertenece, como para que sepa donde encontrarlo.
@@ -169,4 +186,4 @@ const getUserChats = async (req, res, next) => {
   return res.status(200).json(userChats);
 };
 
-module.exports = {getUserChats, newComment}
+module.exports = { getUserChats, newComment, getChatByIdPopulate };

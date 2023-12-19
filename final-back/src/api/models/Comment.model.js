@@ -4,6 +4,8 @@ const CommentSchema = new Schema(
   {
     rating: { type: Number, required: false, min: 0, max: 5 },
     creator: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
+    creatorName:{type:String},
+    creatorImage:{type:String},
     commentedUser: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     commentedRoom: { type: mongoose.Schema.Types.ObjectId, ref: 'Room' },
     commentedPost: { type: mongoose.Schema.Types.ObjectId, ref: 'Post' },

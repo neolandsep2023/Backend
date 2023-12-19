@@ -114,7 +114,7 @@ const newComment = async (req, res, next) => {
                         { path: "userTwo", model: User },
                         { path: "comments", model: Comment, populate: "commentedUser creator" },
                       ],
-                    });
+                    }),
                   });
                 } catch (error) {
                   return res.status(404).json("Error updating existing chat.");
@@ -168,3 +168,5 @@ const getUserChats = async (req, res, next) => {
   });
   return res.status(200).json(userChats);
 };
+
+module.exports = {getUserChats, newComment}

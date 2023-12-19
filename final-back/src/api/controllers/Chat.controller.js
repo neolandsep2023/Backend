@@ -112,9 +112,9 @@ const newComment = async (req, res, next) => {
                       populate: [
                         { path: "userOne", model: User },
                         { path: "userTwo", model: User },
-                        { path: "comments", model: Comment },
+                        { path: "comments", model: Comment, populate: "commentedUser creator" },
                       ],
-                    }),
+                    });
                   });
                 } catch (error) {
                   return res.status(404).json("Error updating existing chat.");
@@ -156,7 +156,6 @@ const newComment = async (req, res, next) => {
 //aqui hacemos un populado de un populado. Cogemos user y populamos chats,
 //y a su vez, populamos lo que hay dentro de chats. Path es como se llama la clave que vamos a popular, y model
 //al modelo que pertenece, como para que sepa donde encontrarlo.
-
 const getUserChats = async (req, res, next) => {
   const { id } = req.user;
   const userChats = await User.findById(id).populate({
@@ -164,13 +163,8 @@ const getUserChats = async (req, res, next) => {
     populate: [
       { path: "userOne", model: User },
       { path: "userTwo", model: User },
-      { path: "comments", model: Comment },
+      { path: "comments", model: Comment, populate: "commentedUser creator" },
     ],
   });
   return res.status(200).json(userChats);
-};
-
-module.exports = {
-  newComment,
-  getUserChats
 };

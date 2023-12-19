@@ -107,7 +107,14 @@ const newComment = async (req, res, next) => {
                     newComment: await Comment.findById(savedComment._id),
                     chatUpdate: await Chat.findById(
                       chatExistOne ? chatExistOne._id : chatExistTwo._id
-                    ),
+                    ).populate({
+                      path: "chats",
+                      populate: [
+                        { path: "userOne", model: User },
+                        { path: "userTwo", model: User },
+                        { path: "comments", model: Comment },
+                      ],
+                    }),
                   });
                 } catch (error) {
                   return res.status(404).json("Error updating existing chat.");

@@ -5,8 +5,6 @@ const commoditiesHomeEnum = [
   "Shower",
   "Bathtub",
   "Kitchen",
-  "Oven Stove",
-  "Refrigerator",
   "Microwave",
   "Heating",
   "Air Conditioning",

@@ -2,6 +2,7 @@ const Post = require("../models/Post.model");
 const User = require("../models/User.model");
 const Comment = require("../models/Comment.model");
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
+const Room = require("../models/Room.model");
 
 //! ---------------- CREATE -----------------
 
@@ -211,10 +212,6 @@ const allPostByType = async (req, res, next) => {
 };
 
 
-
-
-
-
 //! ---------------- UPDATE -----------------
 
 const updatePost = async (req, res) => {
@@ -377,6 +374,63 @@ const toggleRoommates = async (req, res) => {
   return res.status(500).json({message: "Error general en el catch", error: error.message})
  }
 };
+
+//! ---------------- TOGGLE ROOM -------------
+const toggleRoom = async (req, res) => {
+  console.log("entro en toggle")
+ try {
+  const { id, room } = req.params;
+  const postById = await Post.findById(id);
+  if (postById) {
+    const arrayIdRoom = room.split(",");
+
+    Promise.all([
+      arrayIdRoom.forEach(async (room) => {
+        if (postById.room.includes(room)) {
+          try {
+            await Post.findByIdAndUpdate(id, {
+              $pull: {room: room},
+            })
+            try {
+              await Room.findByIdAndUpdate(room, {
+                $pull: {post: id}
+              })
+            } catch (error) {
+              return res.status(404).json({message: "Error al quitar el post del room", error: error.message})
+            }
+          } catch (error) {
+            return res.status(404).json({message: "Error al quitar el room del post", error: error.message})
+          }
+        } else {
+          try {
+            await Post.findByIdAndUpdate(id, {
+              $push: {room: room},
+            })
+            try {
+              await Room.findByIdAndUpdate(room, {
+                $push: {post: id}
+              })
+            } catch (error) {
+              return res.status(404).json({message: "Error al añadir el post al room", error: error.message})
+            }
+          } catch (error) {
+            return res.status(404).json({message: "Error al añadir el room al post", error: error.message})
+          }
+        }
+      }),
+    ]).then(async () => {
+      return res.status(200).json({
+        dataUpdate: await Post.findById(id).populate("room roommates author likes saved") //? falta roomates que lo he quitado para poder ver si el room se ha añadido y renderizar cietas cosas si si o si no
+      })
+    })
+  } else {
+    return res.status(404).json("este post no existe")
+  }
+ } catch (error) {
+  return res.status(500).json({message: "Error general en el catch", error: error.message})
+ }
+};
+
 
 //! ---------------- SEARCH -----------------
 
@@ -543,4 +597,5 @@ module.exports = {
   getByPostcode,
   getByProvince,
   toggleRoommates,
+  toggleRoom
 };

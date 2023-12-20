@@ -1,13 +1,13 @@
 const { deleteImgCloudinary } = require("../../middleware/files.middleware");
 const enumCheck = require("../../utils/enumCheck");
+const Post = require("../models/Post.model");
 const Room = require("../models/Room.model");
 const User = require("../models/User.model");
 
 //! ------------------ CREATE ------------------
 const createRoom = async (req, res, next) => {
   let catchImg = req?.files;
-  console.log("soy req.files", req.files);
-  console.log("soy req.user", req.user);
+  console.log("soy req.files", req.body);
 
   try {
     await Room.syncIndexes();
@@ -19,7 +19,6 @@ const createRoom = async (req, res, next) => {
       catchImg.forEach((img) => {
         newRoom.image.push(img.path);
         a++;
-        console.log("hola");
       });
     } else {
       newRoom.image = [
@@ -28,7 +27,17 @@ const createRoom = async (req, res, next) => {
     }
 
     const saveRoom = await newRoom.save();
-    console.log(saveRoom);
+
+    if (req?.body?.post) {
+      console.log("holaaaaa", saveRoom._id)
+      try {
+        await Post.findByIdAndUpdate(req?.body?.post, {
+          $push: {room: saveRoom._id}
+        })
+      } catch (error) {
+        return res.status(500).json(error.message)
+      }
+    }
     try {
       await User.findByIdAndUpdate(req.user._id, {
         $push: { myRooms: saveRoom._id },
@@ -281,7 +290,7 @@ const deleteRoom = async (req, res, next) => {
 const getById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const roomById = await Room.findById(id).populate("postedBy");
+    const roomById = await Room.findById(id).populate("postedBy post");
     return roomById
       ? res.status(200).json(roomById)
       : res.status(404).json("we couldn't find the room");
@@ -298,7 +307,7 @@ const getByName = async (req, res, next) => {
   try {
     const { name } = req.params;
     const roomByName = await Room.find({
-      name: { $regex: name, $options: "i" },
+      title: { $regex: name, $options: "i" },
     }).populate("postedBy");
     return roomByName
       ? res.status(200).json(roomByName)

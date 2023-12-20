@@ -82,8 +82,6 @@ const RoomSchema = new Schema(
           "Shower",
           "Bathtub",
           "Kitchen",
-          "Refrigerator",
-          "Oven Stove",
           "Microwave",
           "Heating",
           "Air Conditioning",

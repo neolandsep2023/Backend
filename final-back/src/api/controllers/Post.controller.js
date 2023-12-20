@@ -340,7 +340,7 @@ const toggleRoommates = async (req, res) => {
             })
             try {
               await User.findByIdAndUpdate(roommate, {
-                $pull: {myPosts: id}
+                $pull: {postsIAmIn: id}
               })
             } catch (error) {
               return res.status(404).json({message: "Error al quitar el post del user", error: error.message})
@@ -355,7 +355,7 @@ const toggleRoommates = async (req, res) => {
             })
             try {
               await User.findByIdAndUpdate(roommate, {
-                $push: {myPosts: id}
+                $push: {postsIAmIn: id}
               })
             } catch (error) {
               return res.status(404).json({message: "Error al añadir el post al user", error: error.message})

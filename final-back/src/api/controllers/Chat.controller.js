@@ -14,7 +14,7 @@ const newComment = async (req, res, next) => {
     const commentBody = {
       textComment: req.body.textComment,
       creator: req.user._id,
-      commentType: "privado",
+      type: "private",
       commentedUser: req.body.otherUser,
     };
     const newComment = new Comment(commentBody);
@@ -175,7 +175,7 @@ const getChatByIdPopulate = async (req, res, next) => {
 //al modelo que pertenece, como para que sepa donde encontrarlo.
 const getUserChats = async (req, res, next) => {
   const { id } = req.user;
-  const userChats = await User.findById(id).populate({
+  const userChats = await User.findById(id).sort({ createdAt: -1 }).populate({
     path: "chats",
     populate: [
       { path: "userOne", model: User },

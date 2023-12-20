@@ -22,7 +22,8 @@ const {
   toggleLikedComment,
   getUserByIdPopulated,
   getUserByIdLikesPopulated,
-  registerGoogle
+  registerGoogle,
+  getUserByUsernamePopulated
 } = require("../controllers/User.controller");
 
 //!--------ROUTES----------------------------------------------
@@ -53,6 +54,7 @@ UserRoutes.delete("/deleteUser", [isAuth], deleteUser)
 UserRoutes.get("/getAll", [isAuth], getAll)
 UserRoutes.get("/getById/:id", [isAuth], getUserById)
 UserRoutes.get("/getByIdP/:id", [isAuth], getUserByIdPopulated)
+UserRoutes.get("/getByUsernameP/:username", [isAuth], getUserByUsernamePopulated)
 UserRoutes.get("/getByIdPopulatedLikes/:id", [isAuth], getUserByIdLikesPopulated)
 UserRoutes.get("/byName/:name", [isAuth], getByName)
 UserRoutes.get("/byAge/age", [isAuth], getByAge)

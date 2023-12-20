@@ -29,71 +29,53 @@ const redirectRegister = async (req, res, next) => {
   try {
     await User.syncIndexes();
     let confirmationCode = randomCode();
-    console.log('holaaaaaa')
-    const doesUserExist = await User.findOne(
-      { email: req.body.email }
-    );
+    console.log("holaaaaaa");
+    const doesUserExist = await User.findOne({ email: req.body.email });
     if (!doesUserExist) {
-
       try {
+        const doesUserNameExist = await User.findOne({
+          username: req.body.username,
+        });
 
-        const doesUserNameExist = await User.findOne(
-          { username: req.body.username },
-        );
-
-          if(!doesUserNameExist){
-
-
-        const newUser = new User({ ...req.body, confirmationCode });
-        if (req.file) {
-          newUser.image = req.file.path;
-        } else {
-          newUser.image = "https://pic.onlinewebfonts.com/svg/img_181369.png";
-        }
-  
-        //   if(req.body.interests) {
-        //     req.body.interests.forEach(element => {
-        //         interestsEnum('interests', item)
-        //     });
-        //   }
-        try {
-          const savedUser = await newUser.save();
-          if (savedUser) {
-            return res.redirect(
-              307,
-              `http://localhost:8081/api/v1/users/register/sendMail/${savedUser._id}`
-            );
+        if (!doesUserNameExist) {
+          const newUser = new User({ ...req.body, confirmationCode });
+          if (req.file) {
+            newUser.image = req.file.path;
+          } else {
+            newUser.image = "https://pic.onlinewebfonts.com/svg/img_181369.png";
           }
-        } catch (error) {
-          req.file && deleteImgCloudinary(catchImage);
-          return res.status(404).json({
-            error: "Error in save catch",
-            message: error.message,
-          });
-        }
-  
-      }else {
-        if (req.file) deleteImgCloudinary(catchImage);
-        return res.status(409).json("This username already exists.");
-      }
 
-        
+          //   if(req.body.interests) {
+          //     req.body.interests.forEach(element => {
+          //         interestsEnum('interests', item)
+          //     });
+          //   }
+          try {
+            const savedUser = await newUser.save();
+            if (savedUser) {
+              return res.redirect(
+                307,
+                `http://localhost:8081/api/v1/users/register/sendMail/${savedUser._id}`
+              );
+            }
+          } catch (error) {
+            req.file && deleteImgCloudinary(catchImage);
+            return res.status(404).json({
+              error: "Error in save catch",
+              message: error.message,
+            });
+          }
+        } else {
+          if (req.file) deleteImgCloudinary(catchImage);
+          return res.status(409).json("This username already exists.");
+        }
       } catch (error) {
         req.file && deleteImgCloudinary(catchImage);
-          return res.status(404).json({
-            error: "Error in save catch",
-            message: error.message,
-          });
+        return res.status(404).json({
+          error: "Error in save catch",
+          message: error.message,
+        });
       }
-      
-   
-
-
-
-
-
-
-
     } else {
       if (req.file) deleteImgCloudinary(catchImage);
       return res.status(409).json("This user already exists.");
@@ -108,8 +90,6 @@ const redirectRegister = async (req, res, next) => {
     );
   }
 };
-
-
 
 //<!--SEC                                   REGISTER GOOGLE                                                  ->
 
@@ -126,43 +106,45 @@ const registerGoogle = async (req, res, next) => {
     username: req.body.username,
     googleSignUp: true,
   };
-console.log(customBody.password)
+  console.log(customBody.password);
   try {
     await User.syncIndexes();
-      
-      const doesUserExist = await User.findOne(
-        { username: req.body.username },
-        { email: req.body.email }
-      );
+
+    const doesUserExist = await User.findOne(
+      { username: req.body.username },
+      { email: req.body.email }
+    );
 
     if (!doesUserExist) {
       const newUser = new User(customBody);
 
       try {
-        console.log('HOLAAAAAAAAAAAAAAA', newUser);
+        console.log("HOLAAAAAAAAAAAAAAA", newUser);
         const savedUser = await newUser.save();
-        console.log('lo guardooooo', savedUser);
+        console.log("lo guardooooo", savedUser);
 
         if (savedUser) {
-          console.log('entro');
+          console.log("entro");
           return res.status(200).json(savedUser);
         }
       } catch (error) {
-        console.error('Error during save:', error);
+        console.error("Error during save:", error);
         return res.status(500).json(error.message);
       }
     } else {
       if (req.file) deleteImgCloudinary(catchImage);
-      return res.status(409).json('This user already exists.');
+      return res.status(409).json("This user already exists.");
     }
   } catch (error) {
     req.file && deleteImgCloudinary(catchImage);
-    console.error('Error in try-catch block:', error);
+    console.error("Error in try-catch block:", error);
 
-    return res.status(500).json({
-      error: 'Error in the catch block',
-      message: error.message,
-    }) && next(error);
+    return (
+      res.status(500).json({
+        error: "Error in the catch block",
+        message: error.message,
+      }) && next(error)
+    );
   }
 };
 
@@ -174,12 +156,7 @@ console.log(customBody.password)
 //y luego en el modelo de usuario meter una clave que sea loginMethod y diga google o normal, para que en el login
 //te diga si tienes que hacer login con google o normal
 
-
 module.exports = registerGoogle;
-
-
-
-
 
 //<-- SEC              SENDCODE DEL REDIRECT DE SENDMAIL!!!                    -->
 const sendCode = async (req, res, next) => {
@@ -333,10 +310,10 @@ const userLogin = async (req, res, next) => {
   try {
     const { password, email } = req.body;
     const userFromDB = await User.findOne({ email });
-    
+
     if (userFromDB) {
       if (userFromDB.googleSignUp == true) {
-        return res.status(404).json('Sign in with Google.')
+        return res.status(404).json("Sign in with Google.");
       }
       if (bcrypt.compareSync(password, userFromDB.password)) {
         const token = generateToken(userFromDB._id, email); //token
@@ -398,7 +375,7 @@ const passChangeWhileLoggedOut = async (req, res, next) => {
     const { email } = req.body;
     console.log(req.body);
     const userFromDB = await User.findOne({ email });
-    console.log(userFromDB)
+    console.log(userFromDB);
     if (userFromDB) {
       // if (userFromDB.googleSignUp == true) {
       //   return res.status(404).json('Sign in with Google.')}
@@ -422,7 +399,7 @@ const passChangeWhileLoggedOut = async (req, res, next) => {
 //!REDIRECT DE SEND PASSWORD DE LA ANTERIOR!!
 const sendPassword = async (req, res, next) => {
   try {
-    console.log("entro aqui")
+    console.log("entro aqui");
     const { id } = req.params;
     console.log({ id });
     const userById = await User.findById(id);
@@ -462,9 +439,9 @@ const sendPassword = async (req, res, next) => {
           // console.log(updatedUser.password);
 
           if (bcrypt.compareSync(newPassword, updatedUser.password)) {
-           
-            return res.status(200).json({ updateUser: true, sendPassword: true })
-
+            return res
+              .status(200)
+              .json({ updateUser: true, sendPassword: true });
           } else {
             return res.status(404).json({
               message:
@@ -560,14 +537,14 @@ const updateUser = async (req, res, next) => {
     patchedUser.gender = req.user.gender;
     patchedUser.username = req.user.username;
     patchedUser.postsIAmIn = req.user.postsIAmIn;
-    patchedUser.birthYear = req?.body?.birthYear ? req?.body?.birthYear : req.user.birthYear;
+    patchedUser.birthYear = req?.body?.birthYear
+      ? req?.body?.birthYear
+      : req.user.birthYear;
     patchedUser.name = req.body?.name ? req.body.name : req.user.name;
     patchedUser.lastName = req.body?.lastName
       ? req.body.lastName
       : req.user.lastName;
-      patchedUser.habits = req?.body?.habits
-      ? req.body.habits
-      : req.user.habits;
+    patchedUser.habits = req?.body?.habits ? req.body.habits : req.user.habits;
     patchedUser.description = req.body?.description
       ? req.body.description
       : req.user.description;
@@ -578,27 +555,22 @@ const updateUser = async (req, res, next) => {
     patchedUser.myPosts = req.user.myPosts;
     patchedUser.likedPosts = req.user.likedPosts;
 
+    console.log("PATCHED USERRRRRRRR", patchedUser);
 
-    console.log("PATCHED USERRRRRRRR",patchedUser)
+    if (req.body?.interests) {
+      const { interests } = req.body; //! ES UN ARRAY
 
-      if (req.body?.interests) {
-        const { interests } = req.body;   //! ES UN ARRAY
-
-        console.log(interests, 'Final del forEach');
-        let enumResult = enumCheck("interests", interests);
-        console.log(enumResult, 'Enum result');
-        patchedUser.interests = enumResult.check
-          ? interests
-          : req.user.interests;
-      }
-              // Testeamos interests por separado porque es un array de un enum,
-        // entonces lo que hacemos es hacer un forEach sopesando si cada uno
-        // de los elementos forma parte del enum, sumando al accumulator si es cierto.
-        // Luego miramos si el accumulator ha subido, y en el caso de que sea mayor que 0,
-        // es decir, que en alguno de los forEach haya dado false, setteamos a false el resultado
-        // del testing de interests.
-
-
+      console.log(interests, "Final del forEach");
+      let enumResult = enumCheck("interests", interests);
+      console.log(enumResult, "Enum result");
+      patchedUser.interests = enumResult.check ? interests : req.user.interests;
+    }
+    // Testeamos interests por separado porque es un array de un enum,
+    // entonces lo que hacemos es hacer un forEach sopesando si cada uno
+    // de los elementos forma parte del enum, sumando al accumulator si es cierto.
+    // Luego miramos si el accumulator ha subido, y en el caso de que sea mayor que 0,
+    // es decir, que en alguno de los forEach haya dado false, setteamos a false el resultado
+    // del testing de interests.
 
     try {
       await User.findByIdAndUpdate(req.user._id, patchedUser);
@@ -607,44 +579,39 @@ const updateUser = async (req, res, next) => {
       //------testing--------
 
       try {
-        
-      const updatedUser = await User.findById(req.user._id);
-      const updatedKeys = Object.keys(req.body);
-      const testingUpdate = [];
+        const updatedUser = await User.findById(req.user._id);
+        const updatedKeys = Object.keys(req.body);
+        const testingUpdate = [];
 
-
-      updatedKeys.forEach((item) => {
-
-        if( item != "interests"){
-        if (updatedUser[item] == req.body[item]) {
-          if (updatedUser[item] != req.user[item]) {
-            testingUpdate.push({ [item]: true });
-          } else {
-            testingUpdate.push({ [item]: "Information is the same." });
+        updatedKeys.forEach((item) => {
+          if (item != "interests") {
+            if (updatedUser[item] == req.body[item]) {
+              if (updatedUser[item] != req.user[item]) {
+                testingUpdate.push({ [item]: true });
+              } else {
+                testingUpdate.push({ [item]: "Information is the same." });
+              }
+            } else {
+              testingUpdate.push({ [item]: false });
+            }
           }
-        } else {
-           testingUpdate.push({ [item]: false });
-          
-        }
-      }
-      });
-      console.log("aquiii", testingUpdate)
-
-      if (req.body.interests) {
-        const { interests } = req.body;   //! ES UN ARRAY
-  
-        let acc = 0;
-
-        
-        interests.forEach((interest) => {
-          !updatedUser.interests.includes(interest) && acc++;
         });
-      
-        acc > 0
-          ? (testingUpdate['interests'] = false)
-          : (testingUpdate['interests'] = true);
-      }
-      console.log(testingUpdate)
+        console.log("aquiii", testingUpdate);
+
+        if (req.body.interests) {
+          const { interests } = req.body; //! ES UN ARRAY
+
+          let acc = 0;
+
+          interests.forEach((interest) => {
+            !updatedUser.interests.includes(interest) && acc++;
+          });
+
+          acc > 0
+            ? (testingUpdate["interests"] = false)
+            : (testingUpdate["interests"] = true);
+        }
+        console.log(testingUpdate);
 
         if (req.file) {
           updatedUser.image === catchImage
@@ -653,16 +620,14 @@ const updateUser = async (req, res, next) => {
         }
         // console.log("entro", updatedUser)
         return res.status(200).json({ updatedUser, testingUpdate });
-      
-
       } catch (error) {
         return res
-        .status(404)
-        .json({ error: "Error in updating the user", message: error.message });
+          .status(404)
+          .json({
+            error: "Error in updating the user",
+            message: error.message,
+          });
       }
-  
-
-
     } catch (error) {
       return res
         .status(404)
@@ -679,14 +644,13 @@ const updateUser = async (req, res, next) => {
   }
 };
 
-
 //<!--SEC                                        DELETE USER                                                     ->
 
 const deleteUser = async (req, res, next) => {
   if (req.user.googleSignUp == false) {
     try {
-    const _id = req?.user?._id;
-    const dataBaseUser = await User.findById(_id);
+      const _id = req?.user?._id;
+      const dataBaseUser = await User.findById(_id);
       try {
         await User.findByIdAndDelete(req.user?._id);
         deleteImgCloudinary(dataBaseUser.image);
@@ -711,7 +675,7 @@ const deleteUser = async (req, res, next) => {
                       await Post.updateMany(
                         { likes: _id },
                         { $pull: { likes: _id } }
-                      )
+                      );
                       try {
                       } catch (error) {
                         return res.status(404).json("Error pulling references");
@@ -755,14 +719,14 @@ const deleteUser = async (req, res, next) => {
       } catch (error) {
         return res.status(500).json("Error in delete catch");
       }
-  } catch (error) {
-    return (
-      res.status(500).json({
-        error: "Error en el catch",
-        message: error.message,
-      }) && next(error)
-    );
-  }
+    } catch (error) {
+      return (
+        res.status(500).json({
+          error: "Error en el catch",
+          message: error.message,
+        }) && next(error)
+      );
+    }
   } else {
     try {
       await User.findByIdAndDelete(req.user?._id);
@@ -771,15 +735,9 @@ const deleteUser = async (req, res, next) => {
         try {
           await Comments.deleteMany({ creator: _id });
           try {
-            await Comment.updateMany(
-              { likes: _id },
-              { $pull: { likes: _id } }
-            );
+            await Comment.updateMany({ likes: _id }, { $pull: { likes: _id } });
             try {
-              await Room.updateMany(
-                { likes: _id },
-                { $pull: { likes: _id } }
-              );
+              await Room.updateMany({ likes: _id }, { $pull: { likes: _id } });
               try {
                 await Room.deleteMAny({ postedBy: _id });
                 try {
@@ -861,7 +819,7 @@ const getAll = async (req, res, next) => {
 const getUserById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const userById = await User.findById(id)
+    const userById = await User.findById(id);
     if (userById) {
       return res.status(200).json(userById);
     } else {
@@ -876,14 +834,15 @@ const getUserById = async (req, res, next) => {
     );
   }
 };
-
 
 //<!--SEC                                        GET BY ID LIKES POPULATED                                                   ->
 //WORKS CORRECTLY
 const getUserByIdLikesPopulated = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const userById = await User.findById(id).populate('likedComments savedRooms savedPosts likedPosts');
+    const userById = await User.findById(id).populate(
+      "likedComments savedRooms savedPosts likedPosts"
+    );
     if (userById) {
       return res.status(200).json(userById);
     } else {
@@ -899,17 +858,37 @@ const getUserByIdLikesPopulated = async (req, res, next) => {
   }
 };
 
-
-
-
-
 //<!--SEC                                        GET BY ID  POPULATED                                                   ->
 //WORKS CORRECTLY
 const getUserByIdPopulated = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const userById = await User.findById(id).populate('sentComments receivedComments likedComments savedRooms savedPosts myPosts myRooms myInterests postsIAmIn');
-    ;
+    const userById = await User.findById(id).populate(
+      "sentComments receivedComments likedComments savedRooms savedPosts myPosts myRooms myInterests postsIAmIn"
+    );
+    if (userById) {
+      return res.status(200).json(userById);
+    } else {
+      return res.status(404).json("That user doesn't exist.");
+    }
+  } catch (error) {
+    return (
+      res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      }) && next(error)
+    );
+  }
+};
+
+//<!--SEC                                        GET BY ID  POPULATED                                                   ->
+//WORKS CORRECTLY
+const getUserByUsernamePopulated = async (req, res, next) => {
+  try {
+    const { username } = req.params;
+    const userById = await User.findOne({ username }).populate(
+      "sentComments receivedComments likedComments savedRooms savedPosts myPosts myRooms myInterests postsIAmIn"
+    );
     if (userById) {
       return res.status(200).json(userById);
     } else {
@@ -1008,7 +987,7 @@ const getByAge = async (req, res, next) => {
 
 //<!--SEC                                        TOGGLE LIKE                                                     ->
 const toggleLikedPost = async (req, res, next) => {
-  console.log("entro en mi nabo")
+  console.log("entro en mi nabo");
   try {
     console.log("body y user", req.body, req.user);
     const { id } = req.params;
@@ -1200,10 +1179,11 @@ module.exports = {
   getUserById,
   getUserByIdPopulated,
   getUserByIdLikesPopulated,
+  getUserByUsernamePopulated,
   getByName,
   getByAge,
   toggleLikedComment,
   toggleLikedPost,
   saveRoom,
-  registerGoogle
+  registerGoogle,
 };

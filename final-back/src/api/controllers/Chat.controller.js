@@ -174,8 +174,8 @@ const getChatByIdPopulate = async (req, res, next) => {
 //y a su vez, populamos lo que hay dentro de chats. Path es como se llama la clave que vamos a popular, y model
 //al modelo que pertenece, como para que sepa donde encontrarlo.
 const getUserChats = async (req, res, next) => {
-  const { id } = req.user;
-  const userChats = await User.findById(id).sort({ createdAt: -1 }).populate({
+  const _id = req.user;
+  const userChats = await User.findById(_id).sort({ createdAt: -1 }).populate({
     path: "chats",
     populate: [
       { path: "userOne", model: User },

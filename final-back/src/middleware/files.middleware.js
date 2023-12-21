@@ -9,7 +9,7 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'carpeta proyecto final',
-    allowedFormats: ['jpg', 'png', 'jpeg', 'gif', 'svg', 'webp'],
+    allowedFormats: ['jpg', 'png', 'jpeg', 'svg', 'webp'],
   },
 });
 

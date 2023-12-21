@@ -249,42 +249,43 @@ const deleteRoom = async (req, res, next) => {
 
     if (room) {
       try {
-        //? --------------------------------------- ELIMINAMOS AL ROOM DEL USER (postedBy)
-        await User.updateMany({ myPosts: id }, { $pull: { myPosts: id } });
+        await User.updateMany(
+          { myRooms: id, savedRooms: id},
+          {
+            $pull: {
+              myRooms: id,
+              savedRooms: id,
+            },
+          }
+        )
+          try {
+            await Post.updateMany({ room: id }, { $pull: { room: id } });
+            try {
+              await Comment.updateMany(
+                { commentedRoom: id },
+                { $pull: { commentedRoom: id } }
+              );
+              const postById = await Post.findById(id);
+              return res.status(postById ? 404 : 200).json({
+                deleteTest: postById ? false : true})
+              } catch (error) {
+                return res.status(500).json("Error updating Comments")
+              }
+            } catch (error) {
+              return res.status(500).json("Error updating Posts")
+            }
+          } catch (error) {
+            return res.status(500).json("Error updating Users")
 
-        try {
-          //? -------------------------------------- ELIMINAMOS AL ROOM DEL USER (liked)
-          await User.updateMany(
-            { savedRooms: id },
-            { $pull: { savedRooms: id } }
-          );
-        } catch (error) {
-          return res.status(500).json({
-            error: "Error when deleting liked room from users",
-            message: error.message,
-          });
+          }
+        } else {
+          return res.status("Room not found!")
         }
       } catch (error) {
-        return res.status(500).json({
-          error: "Error when deleting posted room from user",
-          message: error.message,
-        });
+        return res.status(500).json("Error in general operation.")
       }
-
-      const findByIdRoom = await Room.findById(id);
-      return res.status(findByIdRoom ? 404 : 200).json({
-        deleteTest: findByIdRoom ? false : true,
-      });
-    } else {
-      return res.status(404).json("the given room does not exist");
     }
-  } catch (error) {
-    return res.status(500).json({
-      error: "Error en el catch",
-      message: error.message,
-    });
-  }
-};
+
 
 //! ------------------ GET by ID ------------------
 const getById = async (req, res, next) => {

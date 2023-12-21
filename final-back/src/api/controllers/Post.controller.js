@@ -652,13 +652,13 @@ const deletePost = async (req, res) => {
               return res.status(postById ? 404 : 200).json({
                 deleteTest: postById ? false : true})
               } catch (error) {
-                return res.status(500).json("Error updating Users")
+                return res.status(500).json("Error updating Comments")
               }
             } catch (error) {
               return res.status(500).json("Error updating Rooms")
             }
           } catch (error) {
-            return res.status(500).json("Error updating Comments")
+            return res.status(500).json("Error updating Users")
 
           }
         } else {

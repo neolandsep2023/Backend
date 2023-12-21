@@ -380,6 +380,7 @@ const toggleRoom = async (req, res) => {
   console.log("entro en toggle")
  try {
   const { id, room } = req.params;
+  console.log(id, room)
   const postById = await Post.findById(id);
   if (postById) {
     const arrayIdRoom = room.split(",");

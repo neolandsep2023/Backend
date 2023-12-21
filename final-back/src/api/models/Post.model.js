@@ -14,7 +14,7 @@ const PostSchema = new Schema(
       image: { type: String },
       publicLocation: {type: String, required: true},
       province: {type: String, required: true},
-      postcode: {type: Number, required: true},
+      postcode: {type: String, required: true},
       type: { type: String, enum: ['RoomSeeker', 'RoommateSeeker'], required: true },
       preferredGender: {type: String, required: true, enum: ["female", "male", "irrelevant"]},
       preferredAge: {type: String, required: true, enum: [

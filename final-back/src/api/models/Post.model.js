@@ -10,7 +10,7 @@ const Schema = mongoose.Schema;
 const PostSchema = new Schema(
     {
       title: { type: String, required: true, minLength: 10, maxLength: 55},
-      text: { type: String, required: true, minLength: 100, maxLength: 600 },
+      text: { type: String, required: true, minLength: 100, maxLength: 1000 },
       image: { type: String },
       publicLocation: {type: String, required: true},
       province: {type: String, required: true},

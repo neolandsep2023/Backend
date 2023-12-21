@@ -36,15 +36,14 @@ const createPost = async (req, res) => {
         { $push: { myPosts: savedPost._id } }
       );
 
-      if(savedPost){
+      if (savedPost) {
         return res.status(200).json({
           savedPost,
-          datedPosts
-        })
-      }else{
-        return res.status(404).json("Error saving post")
+          datedPosts,
+        });
+      } else {
+        return res.status(404).json("Error saving post");
       }
-
     } catch (error) {
       return res.status(404).json({
         error: "no se encontro por id",
@@ -63,7 +62,9 @@ const createPost = async (req, res) => {
 const getPostByIdPopulate = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const postById = await Post.findById(id).populate("author likes comments roommates room"); //? cogemos el elemento (eleven) identificandola a través del id, que es único
+    const postById = await Post.findById(id).populate(
+      "author likes comments roommates room"
+    ); //? cogemos el elemento (eleven) identificandola a través del id, que es único
     return res
       .status(postById ? 200 : 404)
       .json(postById ? postById : "post not found");
@@ -94,18 +95,17 @@ const getPostById = async (req, res, next) => {
 //! --------------- GET ALL -- POPULATED!! ----------------
 const getAllPostsPopulated = async (req, res, next) => {
   try {
-    const allPosts = await Post.find().sort({ createdAt: -1 }).populate("author likes comments");
+    const allPosts = await Post.find()
+      .sort({ createdAt: -1 })
+      .populate("author likes comments");
 
-
-    if(allPosts.length>0){
+    if (allPosts.length > 0) {
       return res.status(200).json({
-        allPosts
-      })
-
-    }else{
-      return res.status(404).json("posts Not Found")
+        allPosts,
+      });
+    } else {
+      return res.status(404).json("posts Not Found");
     }
-
   } catch (error) {
     return res.status(500).json({
       error: "Error en el catch",
@@ -129,7 +129,6 @@ const getAllPosts = async (req, res, next) => {
   }
 };
 
-
 //! --------------- GET BY POSTCODE ----------------
 
 const getByPostcode = async (req, res, next) => {
@@ -149,14 +148,13 @@ const getByPostcode = async (req, res, next) => {
   }
 };
 
-
 //! --------------- GET BY PROVINCE ----------------
 const getByProvince = async (req, res, next) => {
   try {
     const { province } = req.params;
-    const postByProvince = await Post.find({ province: province }).sort({ createdAt: -1 }).populate(
-      "author"
-    );
+    const postByProvince = await Post.find({ province: province })
+      .sort({ createdAt: -1 })
+      .populate("author");
     return postByProvince
       ? res.status(200).json(postByProvince)
       : res.status(404).json("we couldn't find the room");
@@ -178,7 +176,9 @@ const postByType = async (req, res, next) => {
       /*  --EX  En este caso, $IN lo que hace es buscar que objetos
             --EX cumplen con la categoria que tenemos. Es decir, 
             --EX encuentra los lifters que IN weightCategory tengan category  */
-    }).sort({ createdAt: -1 }).populate("author likes comments");
+    })
+      .sort({ createdAt: -1 })
+      .populate("author likes comments");
     return res.status(200).json(postsByType);
   } catch (error) {
     return res.status(500).json({
@@ -189,7 +189,7 @@ const postByType = async (req, res, next) => {
 };
 
 const allPostByType = async (req, res, next) => {
-  console.log(req.params)
+  console.log(req.params);
   const { type } = req.params;
   try {
     const postsByType = await Post.find({
@@ -197,12 +197,12 @@ const allPostByType = async (req, res, next) => {
       /*  --EX  En este caso, $IN lo que hace es buscar que objetos
             --EX cumplen con la categoria que tenemos. Es decir, 
             --EX encuentra los lifters que IN weightCategory tengan category  */
-    }).sort({ createdAt: -1 }).populate("author likes comments");
+    })
+      .sort({ createdAt: -1 })
+      .populate("author likes comments");
 
-
-    console.log(postsByType)
+    console.log(postsByType);
     return res.status(200).json(postsByType);
-
   } catch (error) {
     return res.status(500).json({
       error: "Error en el catch",
@@ -211,11 +211,10 @@ const allPostByType = async (req, res, next) => {
   }
 };
 
-
 //! ---------------- UPDATE -----------------
 
 const updatePost = async (req, res) => {
-  let catchImg = req.file?.path; 
+  let catchImg = req.file?.path;
   try {
     await Post.syncIndexes();
     const { id } = req.params;
@@ -228,22 +227,31 @@ const updatePost = async (req, res) => {
           title: req.body?.title ? req.body.title : postById.title,
           text: req.body?.text ? req.body.text : postById.text,
           type: postById.type,
-          preferredGender: req.body?.preferredGender ? req.body.preferredGender : postById.preferredGender,
-          preferredAge: req.body?.preferredAge ? req.body.preferredAge : postById.preferredAge,
+          preferredGender: req.body?.preferredGender
+            ? req.body.preferredGender
+            : postById.preferredGender,
+          preferredAge: req.body?.preferredAge
+            ? req.body.preferredAge
+            : postById.preferredAge,
           postcode: postById.postcode,
           province: postById.province,
           price: req.body?.price ? parseInt(req.body.price) : postById.price,
-          deposit: req.body?.deposit ? JSON.parse(req.body.deposit) : postById.deposit,
-          depositPrice: req.body?.depositPrice ? parseInt(req.body.depositPrice) : postById.depositPrice,
+          deposit: req.body?.deposit
+            ? JSON.parse(req.body.deposit)
+            : postById.deposit,
+          depositPrice: req.body?.depositPrice
+            ? parseInt(req.body.depositPrice)
+            : postById.depositPrice,
           author: postById.author,
           room: req.body?.room ? req.body.room : postById.room,
-          roommates: req.body?.roommates ? req.body.roommates : postById.roommates,
+          roommates: req.body?.roommates
+            ? req.body.roommates
+            : postById.roommates,
           likes: postById.likes,
           comments: postById.comments,
           saved: postById.saved,
         };
-        console.log("customBody", customBody)
-
+        console.log("customBody", customBody);
 
         try {
           await Post.findByIdAndUpdate(id, customBody).populate(
@@ -258,9 +266,9 @@ const updatePost = async (req, res) => {
           //!           -------------------
 
           const postByIdUpdated = await Post.findById(id);
-          console.log(postByIdUpdated.deposit, typeof(postByIdUpdated.deposit))
-          console.log(customBody.deposit, typeof(customBody.deposit))
-  
+          console.log(postByIdUpdated.deposit, typeof postByIdUpdated.deposit);
+          console.log(customBody.deposit, typeof customBody.deposit);
+
           const elementUpdate = Object.keys(req.body);
           let test = {};
 
@@ -284,7 +292,9 @@ const updatePost = async (req, res) => {
           }
 
           // Count the number of false values in the test object
-          const acc = Object.values(test).filter((value) => value === false).length;
+          const acc = Object.values(test).filter(
+            (value) => value === false
+          ).length;
 
           if (acc > 0) {
             return res.status(404).json({
@@ -321,201 +331,227 @@ const updatePost = async (req, res) => {
 };
 //! ---------------- TOGGLE ROOMMATES -------------
 const toggleRoommates = async (req, res) => {
-  console.log("entro en toggle")
- try {
-  const { id, roommates } = req.params;
-  const postById = await Post.findById(id);
-  if (postById) {
-    const arrayIdRoommates = roommates.split(",");
+  console.log("entro en toggle");
+  try {
+    const { id, roommates } = req.params;
+    const postById = await Post.findById(id);
+    if (postById) {
+      const arrayIdRoommates = roommates.split(",");
 
-    Promise.all([
-      arrayIdRoommates.forEach(async (roommate) => {
-        if (postById.roommates.includes(roommate)) {
-          try {
-            await Post.findByIdAndUpdate(id, {
-              $pull: {roommates: roommate},
-            })
+      Promise.all([
+        arrayIdRoommates.forEach(async (roommate) => {
+          if (postById.roommates.includes(roommate)) {
             try {
-              await User.findByIdAndUpdate(roommate, {
-                $pull: {postsIAmIn: id}
-              })
+              await Post.findByIdAndUpdate(id, {
+                $pull: { roommates: roommate },
+              });
+              try {
+                await User.findByIdAndUpdate(roommate, {
+                  $pull: { postsIAmIn: id },
+                });
+              } catch (error) {
+                return res
+                  .status(404)
+                  .json({
+                    message: "Error al quitar el post del user",
+                    error: error.message,
+                  });
+              }
             } catch (error) {
-              return res.status(404).json({message: "Error al quitar el post del user", error: error.message})
+              return res
+                .status(404)
+                .json({
+                  message: "Error al quitar el user del post",
+                  error: error.message,
+                });
             }
-          } catch (error) {
-            return res.status(404).json({message: "Error al quitar el user del post", error: error.message})
-          }
-        } else {
-          try {
-            await Post.findByIdAndUpdate(id, {
-              $push: {roommates: roommate},
-            })
+          } else {
             try {
-              await User.findByIdAndUpdate(roommate, {
-                $push: {postsIAmIn: id}
-              })
+              await Post.findByIdAndUpdate(id, {
+                $push: { roommates: roommate },
+              });
+              try {
+                await User.findByIdAndUpdate(roommate, {
+                  $push: { postsIAmIn: id },
+                });
+              } catch (error) {
+                return res
+                  .status(404)
+                  .json({
+                    message: "Error al añadir el post al user",
+                    error: error.message,
+                  });
+              }
             } catch (error) {
-              return res.status(404).json({message: "Error al añadir el post al user", error: error.message})
+              return res
+                .status(404)
+                .json({
+                  message: "Error al añadir el user al post",
+                  error: error.message,
+                });
             }
-          } catch (error) {
-            return res.status(404).json({message: "Error al añadir el user al post", error: error.message})
           }
-        }
-      }),
-    ]).then(async () => {
-      return res.status(200).json({
-        dataUpdate: await Post.findById(id).populate("author room likes saved comments") //? falta roomates que lo he quitado para poder ver si el user se ha añadido y renderizar cietas cosas si si o si no
-      })
-    })
-  } else {
-    return res.status(404).json("este post no existe")
+        }),
+      ]).then(async () => {
+        return res.status(200).json({
+          dataUpdate: await Post.findById(id).populate(
+            "author room likes saved comments"
+          ), //? falta roomates que lo he quitado para poder ver si el user se ha añadido y renderizar cietas cosas si si o si no
+        });
+      });
+    } else {
+      return res.status(404).json("este post no existe");
+    }
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error general en el catch", error: error.message });
   }
- } catch (error) {
-  return res.status(500).json({message: "Error general en el catch", error: error.message})
- }
 };
 
 //! ---------------- TOGGLE ROOM -------------
-const toggleRoom = async (req, res) => {
-  console.log("entro en toggle")
- try {
-  const { id, room } = req.params;
-  console.log(id, room)
-  const postById = await Post.findById(id);
-  if (postById) {
-    const arrayIdRoom = room.split(",");
-    console.log(postById.room)
-
-    Promise.all([
+const toggleRoom = async (req, res, next) => {
+  console.log("entro en mi nabo");
+  try {
+    console.log("body y user", req.body, req.user);
+    const { id, room } = req.params;
+    const postById = await Post.findById(id);
+    if (postById) {
+      const arrayIdRoom = room.split(",");
+      console.log(postById.room);
       arrayIdRoom.forEach(async (roomId) => {
-        console.log(roomId)
         if (postById.room.includes(roomId)) {
-          console.log("entro en pull")
           try {
             await Post.findByIdAndUpdate(id, {
-              $pull: {room: roomId},
-            })
+              $pull: { room: roomId },
+            });
             try {
               await Room.findByIdAndUpdate(roomId, {
-                $pull: {post: id}
-              })
+                $pull: { post: id },
+              });
+              return res.status(200).json({
+                dataUpdate: await Post.findById(id),
+              });
             } catch (error) {
-              return res.status(404).json({message: "Error al quitar el post del room", error: error.message})
+              return res
+                .status(404)
+                .json({
+                  message: "Error al quitar el post del room",
+                  error: error.message,
+                });
             }
           } catch (error) {
-            return res.status(404).json({message: "Error al quitar el room del post", error: error.message})
+            return res
+              .status(404)
+              .json({
+                message: "Error al quitar el room del post",
+                error: error.message,
+              });
           }
         } else {
-          console.log("entro en push")
           try {
             await Post.findByIdAndUpdate(id, {
-              $push: {room: roomId},
-            })
+              $push: { room: roomId },
+            });
             try {
               await Room.findByIdAndUpdate(roomId, {
-                $push: {post: id}
-              })
+                $push: { post: id },
+              });
+              return res.status(200).json({
+                dataUpdate: await Post.findById(id),
+              });
             } catch (error) {
-              return res.status(404).json({message: "Error al añadir el post al room", error: error.message})
+              return res.status(404).json({
+                error: error.message,
+                message: "Error in pushing our id to likes in post.",
+              });
             }
           } catch (error) {
-            return res.status(404).json({message: "Error al añadir el room al post", error: error.message})
+            return res.status(404).json("Error in pushing post to savedPosts.");
           }
         }
-      }),
-    ]).then(async () => {
-      const dataUpdate = await Post.findById(id)
-      setTimeout(() => {
-        return res.status(200).json(dataUpdate)
-      }, "300")
-    })
-  } else {
-    return res.status(404).json("este post no existe")
+      });
+    } else {
+      return res.status(404).json("este post no existe");
+    }
+  } catch (error) {
+    return (
+      res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      }) && next(error)
+    );
   }
- } catch (error) {
-  return res.status(500).json({message: "Error general en el catch", error: error.message})
- }
 };
-
 
 //! ---------------- SEARCH -----------------
 
 const searchPost = async (req, res, next) => {
-
   try {
-    let resArrayRoommSeeker = []
-    let resArrayRoommateSeeker = []
+    let resArrayRoommSeeker = [];
+    let resArrayRoommateSeeker = [];
 
     const { search } = req.params;
     const roomSeekerTitleSearch = await Post.find({
       type: { $in: "RoomSeeker" },
       title: { $regex: search, $options: "i" },
-    }).sort({ createdAt: -1 }).populate("author likes");
+    })
+      .sort({ createdAt: -1 })
+      .populate("author likes");
     const roomSeekerTextSearch = await Post.find({
       type: { $in: "RoomSeeker" },
       text: { $regex: search, $options: "i" },
-    }).sort({ createdAt: -1 }).populate("author likes");
+    })
+      .sort({ createdAt: -1 })
+      .populate("author likes");
 
     if (roomSeekerTitleSearch[0] || roomSeekerTextSearch[0]) {
-      
-      roomSeekerTitleSearch.forEach((post)=>{
-        resArrayRoommSeeker.push(post)
-      })
-      roomSeekerTextSearch.forEach((post)=>{
-        resArrayRoommSeeker.push(post)
-      })
+      roomSeekerTitleSearch.forEach((post) => {
+        resArrayRoommSeeker.push(post);
+      });
+      roomSeekerTextSearch.forEach((post) => {
+        resArrayRoommSeeker.push(post);
+      });
     } else {
       return res.status(404).json("Not Found");
     }
 
     try {
-      
-
       const roommateSeekerTitleSearch = await Post.find({
         type: { $in: "RoommateSeeker" },
         title: { $regex: search, $options: "i" },
-      }).sort({ createdAt: -1 }).populate("author likes");
+      })
+        .sort({ createdAt: -1 })
+        .populate("author likes");
       const roommateSeekerTextSearch = await Post.find({
         type: { $in: "RoommateSeeker" },
         text: { $regex: search, $options: "i" },
-      }).sort({ createdAt: -1 }).populate("author likes");
-  
+      })
+        .sort({ createdAt: -1 })
+        .populate("author likes");
+
       if (roommateSeekerTitleSearch[0] || roommateSeekerTextSearch[0]) {
-        
-        roommateSeekerTitleSearch.forEach((post)=>{
-          resArrayRoommateSeeker.push(post)
-        })
-        roommateSeekerTextSearch.forEach((post)=>{
-          resArrayRoommateSeeker.push(post)
-        })
-
-
- } else {
-      return res.status(404).json("Not Found");
-    }
-
-   
-
-
+        roommateSeekerTitleSearch.forEach((post) => {
+          resArrayRoommateSeeker.push(post);
+        });
+        roommateSeekerTextSearch.forEach((post) => {
+          resArrayRoommateSeeker.push(post);
+        });
+      } else {
+        return res.status(404).json("Not Found");
+      }
 
       console.log("entro");
       return res.status(200).json({
         resArrayRoommSeeker,
-        resArrayRoommateSeeker
+        resArrayRoommateSeeker,
       });
-
-
-
-
-  } catch (error) {
-    return res.status(500).json({
-      error: "Error en el catch",
-      message: error.message,
-    });
-  }
-
-
-
+    } catch (error) {
+      return res.status(500).json({
+        error: "Error en el catch",
+        message: error.message,
+      });
+    }
   } catch (error) {
     return res.status(500).json({
       error: "Error en el catch",
@@ -527,7 +563,7 @@ const searchPost = async (req, res, next) => {
 //! ----------------  GET BY LOCATION -----------------
 
 const getPostByLocation = async (req, res, next) => {
-  console.log("entroooo", province)
+  console.log("entroooo", province);
   const { province } = req.params;
   try {
     const postsByLocation = await Post.find({
@@ -542,10 +578,9 @@ const getPostByLocation = async (req, res, next) => {
   }
 };
 
-
 //! ---------------- DELETE -----------------
 
-const deletePost = async (req, res) => {
+const deleteePost = async (req, res) => {
   try {
     const { id } = req.params;
     const post = await Post.findByIdAndDelete(id);
@@ -588,6 +623,52 @@ const deletePost = async (req, res) => {
   }
 };
 
+const deletePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const post = await Post.findByIdAndDelete(id);
+
+    if (post) {
+      try {
+        await User.updateMany(
+          { myPosts: id, likedPosts: id, savedPosts: id, postsIAmIn: id },
+          {
+            $pull: {
+              myPosts: id,
+              likedPosts: id,
+              savedPosts: id,
+              postsIAmIn: id,
+            },
+          }
+        )
+          try {
+            await Room.updateMany({ post: id }, { $pull: { post: id } });
+            try {
+              await Comment.updateMany(
+                { commentedPost: id },
+                { $pull: { commentedPost: id } }
+              );
+              const postById = await Post.findById(id);
+              return res.status(postById ? 404 : 200).json({
+                deleteTest: postById ? false : true})
+              } catch (error) {
+                return res.status(500).json("Error updating Users")
+              }
+            } catch (error) {
+              return res.status(500).json("Error updating Rooms")
+            }
+          } catch (error) {
+            return res.status(500).json("Error updating Comments")
+
+          }
+        } else {
+          return res.status("Post not found!")
+        }
+      } catch (error) {
+        return res.status(500).json("Error in general operation.")
+      }
+    }
+
 module.exports = {
   createPost,
   getPostByIdPopulate,
@@ -603,5 +684,5 @@ module.exports = {
   getByPostcode,
   getByProvince,
   toggleRoommates,
-  toggleRoom
+  toggleRoom,
 };

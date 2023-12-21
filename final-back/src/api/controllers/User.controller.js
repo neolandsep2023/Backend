@@ -733,7 +733,7 @@ const deleteUser = async (req, res, next) => {
       deleteImgCloudinary(dataBaseUser.image);
       try {
         try {
-          await Comments.deleteMany({ creator: _id });
+          await Comment.deleteMany({ creator: _id });
           try {
             await Comment.updateMany({ likes: _id }, { $pull: { likes: _id } });
             try {

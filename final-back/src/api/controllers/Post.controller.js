@@ -384,16 +384,19 @@ const toggleRoom = async (req, res) => {
   const postById = await Post.findById(id);
   if (postById) {
     const arrayIdRoom = room.split(",");
+    console.log(postById.room)
 
     Promise.all([
-      arrayIdRoom.forEach(async (room) => {
-        if (postById.room.includes(room)) {
+      arrayIdRoom.forEach(async (roomId) => {
+        console.log(roomId)
+        if (postById.room.includes(roomId)) {
+          console.log("entro en pull")
           try {
             await Post.findByIdAndUpdate(id, {
-              $pull: {room: room},
+              $pull: {room: roomId},
             })
             try {
-              await Room.findByIdAndUpdate(room, {
+              await Room.findByIdAndUpdate(roomId, {
                 $pull: {post: id}
               })
             } catch (error) {
@@ -403,12 +406,13 @@ const toggleRoom = async (req, res) => {
             return res.status(404).json({message: "Error al quitar el room del post", error: error.message})
           }
         } else {
+          console.log("entro en push")
           try {
             await Post.findByIdAndUpdate(id, {
-              $push: {room: room},
+              $push: {room: roomId},
             })
             try {
-              await Room.findByIdAndUpdate(room, {
+              await Room.findByIdAndUpdate(roomId, {
                 $push: {post: id}
               })
             } catch (error) {
@@ -420,9 +424,10 @@ const toggleRoom = async (req, res) => {
         }
       }),
     ]).then(async () => {
-      return res.status(200).json({
-        dataUpdate: await Post.findById(id).populate("room roommates author likes saved") //? falta roomates que lo he quitado para poder ver si el room se ha añadido y renderizar cietas cosas si si o si no
-      })
+      const dataUpdate = await Post.findById(id)
+      setTimeout(() => {
+        return res.status(200).json(dataUpdate)
+      }, "300")
     })
   } else {
     return res.status(404).json("este post no existe")

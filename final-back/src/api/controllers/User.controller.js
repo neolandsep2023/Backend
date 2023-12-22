@@ -621,12 +621,10 @@ const updateUser = async (req, res, next) => {
         // console.log("entro", updatedUser)
         return res.status(200).json({ updatedUser, testingUpdate });
       } catch (error) {
-        return res
-          .status(404)
-          .json({
-            error: "Error in updating the user",
-            message: error.message,
-          });
+        return res.status(404).json({
+          error: "Error in updating the user",
+          message: error.message,
+        });
       }
     } catch (error) {
       return res
@@ -999,7 +997,7 @@ const toggleLikedPost = async (req, res, next) => {
         });
         try {
           await Post.findByIdAndUpdate(id, {
-            $pull: { liked: _id },
+            $pull: { likes: _id },
           });
           return res.status(200).json({
             user: await User.findById(_id),
@@ -1018,7 +1016,7 @@ const toggleLikedPost = async (req, res, next) => {
         });
         try {
           await Post.findByIdAndUpdate(id, {
-            $push: { liked: _id },
+            $push: { likes: _id },
           });
           return res.status(200).json({
             user: await User.findById(_id),

@@ -55,7 +55,7 @@ const redirectRegister = async (req, res, next) => {
             if (savedUser) {
               return res.redirect(
                 307,
-                `http://localhost:8081/api/v1/users/register/sendMail/${savedUser._id}`
+                `https://connect-a-mate-backend.vercel.app/api/v1/users/register/sendMail/${savedUser._id}`
               );
             }
           } catch (error) {
